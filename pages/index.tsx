@@ -19,6 +19,7 @@ interface MusicNFT {
 export default function Home() {
   const [account, setAccount] = useState<string>('')
   const [provider, setProvider] = useState<any>(null)
+  const [ethereumProvider, setEthereumProvider] = useState<any>(null)
   const [musicNFTs, setMusicNFTs] = useState<MusicNFT[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -44,6 +45,7 @@ export default function Home() {
       if (ethereumProvider) {
         const ethersProvider = new ethers.BrowserProvider(ethereumProvider as any)
         setProvider(ethersProvider)
+        setEthereumProvider(ethereumProvider)
 
         // Check if already connected
         const accounts = await ethereumProvider.request({ method: 'eth_accounts' })
@@ -61,12 +63,12 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      if (!provider) {
+      if (!ethereumProvider) {
         showMessage('Please install MetaMask!', 'error')
         return
       }
 
-      const accounts = await provider.provider.request({
+      const accounts = await ethereumProvider.request({
         method: 'eth_requestAccounts',
       })
 
