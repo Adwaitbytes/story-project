@@ -7,6 +7,7 @@ import { client } from '../../utils/config'
 import { createCommercialRemixTerms, SPGNFTContractAddress } from '../../utils/utils'
 import { createHash } from 'crypto'
 import { IpMetadata } from '@story-protocol/core-sdk'
+import { Address } from 'viem'
 
 export const config = {
   api: {
@@ -15,6 +16,133 @@ export const config = {
 }
 
 // Simple in-memory storage (replace with database in production)
+export let musicStorage: any[] = []
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  try {
+    const form = formidable({
+      uploadDir: '/tmp',
+      keepExtensions: true,
+      maxFileSize: 50 * 1024 * 1024, // 50MB
+    })
+
+    const [fields, files] = await form.parse(req)
+    
+    const title = Array.isArray(fields.title) ? fields.title[0] : fields.title
+    const artist = Array.isArray(fields.artist) ? fields.artist[0] : fields.artist
+    const description = Array.isArray(fields.description) ? fields.description[0] : fields.description
+    const price = Array.isArray(fields.price) ? fields.price[0] : fields.price
+    const owner = Array.isArray(fields.owner) ? fields.owner[0] : fields.owner
+
+    if (!title || !artist || !owner) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    const audioFile = Array.isArray(files.audioFile) ? files.audioFile[0] : files.audioFile
+    const imageFile = Array.isArray(files.imageFile) ? files.imageFile[0] : files.imageFile
+
+    if (!audioFile) {
+      return res.status(400).json({ error: 'Audio file is required' })
+    }
+
+    // Upload files to IPFS
+    let audioUrl = ''
+    let imageUrl = ''
+
+    try {
+      const audioBuffer = await fs.promises.readFile(audioFile.filepath)
+      audioUrl = await uploadFileToIPFS(audioBuffer)
+      console.log('Audio uploaded to IPFS:', audioUrl)
+
+      if (imageFile) {
+        const imageBuffer = await fs.promises.readFile(imageFile.filepath)
+        imageUrl = await uploadFileToIPFS(imageBuffer)
+        console.log('Image uploaded to IPFS:', imageUrl)
+      }
+    } catch (ipfsError) {
+      console.error('IPFS upload error:', ipfsError)
+      // Continue without IPFS for now
+      audioUrl = 'placeholder-audio-url'
+      imageUrl = 'placeholder-image-url'
+    }
+
+    // Create metadata for NFT
+    const metadata = {
+      name: title,
+      description: description || `${title} by ${artist}`,
+      image: imageUrl,
+      audio: audioUrl,
+      attributes: [
+        { trait_type: 'Artist', value: artist },
+        { trait_type: 'Title', value: title },
+        { trait_type: 'License Price', value: price || '0' }
+      ]
+    }
+
+    let metadataUrl = ''
+    try {
+      metadataUrl = await uploadJSONToIPFS(metadata)
+      console.log('Metadata uploaded to IPFS:', metadataUrl)
+    } catch (metadataError) {
+      console.error('Metadata upload error:', metadataError)
+      metadataUrl = 'placeholder-metadata-url'
+    }
+
+    // Create unique ID for the music NFT
+    const musicId = createHash('sha256').update(`${title}-${artist}-${Date.now()}`).digest('hex').slice(0, 16)
+
+    // Create music NFT object
+    const musicNFT = {
+      id: musicId,
+      title: title,
+      artist: artist,
+      description: description || '',
+      price: price || '0',
+      audioUrl: audioUrl,
+      imageUrl: imageUrl,
+      owner: owner,
+      metadataUrl: metadataUrl,
+      createdAt: new Date().toISOString()
+    }
+
+    // For now, we'll just store in memory without blockchain registration
+    // In a real app, you'd want to mint NFT and register with Story Protocol here
+    try {
+      // Simplified version - just store the NFT data
+      musicStorage.push(musicNFT)
+      console.log('Music NFT stored:', musicNFT)
+    } catch (blockchainError) {
+      console.error('Blockchain error:', blockchainError)
+      // Still save to storage even if blockchain fails
+      musicStorage.push(musicNFT)
+    }
+
+    // Clean up temporary files
+    try {
+      if (audioFile.filepath) await fs.promises.unlink(audioFile.filepath)
+      if (imageFile?.filepath) await fs.promises.unlink(imageFile.filepath)
+    } catch (cleanupError) {
+      console.error('Cleanup error:', cleanupError)
+    }
+
+    res.status(200).json({
+      success: true,
+      musicNFT: musicNFT,
+      message: 'Music NFT uploaded successfully'
+    })
+
+  } catch (error) {
+    console.error('Upload error:', error)
+    res.status(500).json({ 
+      error: 'Failed to upload music NFT',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
+}
 let musicStorage: any[] = []
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -5,9 +5,9 @@
     "description": "Music NFT dApp using Story Protocol",
     "main": "index.js",
     "scripts": {
-        "dev": "next dev -p 5000",
+        "dev": "next dev -p 3000",
         "build": "next build",
-        "start": "next start -p 5000",
+        "start": "next start -p 3000",
         "lint": "next lint"
     },
     "dependencies": {
