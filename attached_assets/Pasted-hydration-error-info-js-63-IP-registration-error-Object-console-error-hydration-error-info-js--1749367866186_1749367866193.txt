@@ -1,0 +1,28 @@
+hydration-error-info.js:63 IP registration error: 
+Object
+console.error	@	hydration-error-info.js:63
+
+hydration-error-info.js:63 Error uploading: 
+Object
+console.error	@	hydration-error-info.js:63
+inpage.js:1 MetaMask - RPC Error: Unrecognized chain ID "0x5e9". Try adding the chain using wallet_addEthereumChain first. 
+{code: 4902, message: 'Unrecognized chain ID "0x5e9". Try adding the chain using wallet_addEthereumChain first.', stack: '{\n  "code": 4902,\n  "message": "Unrecognized chain…beogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)'}
+inpage.js:1 MetaMask - RPC Error: Request of type 'wallet_addEthereumChain' already pending for origin https://7181aa55-1e7e-4215-9e8e-0bf70bc609bb-00-28ffyk0v6g384.sisko.replit.dev. Please wait. 
+{code: -32002, message: "Request of type 'wallet_addEthereumChain' already …b-00-28ffyk0v6g384.sisko.replit.dev. Please wait.", stack: '{\n  "code": -32002,\n  "message": "Request of type …beogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)'}
+index.tsx:261 IP registration error: 
+{code: -32002, message: "Request of type 'wallet_addEthereumChain' already …b-00-28ffyk0v6g384.sisko.replit.dev. Please wait.", stack: '{\n  "code": -32002,\n  "message": "Request of type …beogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)'}
+code
+: 
+-32002
+message
+: 
+"Request of type 'wallet_addEthereumChain' already pending for origin https://7181aa55-1e7e-4215-9e8e-0bf70bc609bb-00-28ffyk0v6g384.sisko.replit.dev. Please wait."
+stack
+: 
+"{\n  \"code\": -32002,\n  \"message\": \"Request of type 'wallet_addEthereumChain' already pending for origin https://7181aa55-1e7e-4215-9e8e-0bf70bc609bb-00-28ffyk0v6g384.sisko.replit.dev. Please wait.\",\n  \"stack\": \"Error: Request of type 'wallet_addEthereumChain' already pending for origin https://7181aa55-1e7e-4215-9e8e-0bf70bc609bb-00-28ffyk0v6g384.sisko.replit.dev. Please wait.\\n    at new a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:5787)\\n    at o (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:8878)\\n    at Object.resourceUnavailable (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:9945)\\n    at E.c (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-0.js:1:251441)\\n    at E.addAndShowApprovalRequest (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-0.js:1:248085)\\n    at implementation (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/background-0.js:1:132510)\\n    at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/background-0.js:1:129539\\n    at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362680\\n    at new Promise (<anonymous>)\\n    at E.d (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362337)\\n    at E.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362255)\\n    at async E.f (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362056)\\n    at async E.h (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)\"\n}\n  at new a (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:5787)\n  at o (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:8878)\n  at Object.resourceUnavailable (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-3.js:7:9945)\n  at E.c (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-0.js:1:251441)\n  at E.addAndShowApprovalRequest (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-0.js:1:248085)\n  at implementation (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/background-0.js:1:132510)\n  at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/background-0.js:1:129539\n  at chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362680\n  at new Promise (<anonymous>)\n  at E.d (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362337)\n  at E.l (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362255)\n  at async E.f (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1362056)\n  at async E.h (chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)"
+[[Prototype]]
+: 
+Object
+index.tsx:139 Error uploading: 
+{code: -32002, message: "Request of type 'wallet_addEthereumChain' already …b-00-28ffyk0v6g384.sisko.replit.dev. Please wait.", stack: '{\n  "code": -32002,\n  "message": "Request of type …beogaeaoehlefnkodbefgpgknn/common-2.js:1:1361882)'}
+uploadMusicNFT	@	index.tsx:139
