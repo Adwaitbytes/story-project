@@ -352,9 +352,16 @@ export default function Home() {
                 <div key={nft.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-200">
                   {nft.imageUrl && (
                     <img 
-                      src={nft.imageUrl} 
+                      src={nft.imageUrl.startsWith('http') ? nft.imageUrl : `https://ipfs.io/ipfs/${nft.imageUrl}`} 
                       alt={nft.title}
                       className="w-full h-48 object-cover rounded-lg mb-4"
+                      onError={(e) => {
+                        console.log('Image load error, trying alternative:', nft.imageUrl)
+                        const target = e.target as HTMLImageElement
+                        if (!target.src.includes('placeholder')) {
+                          target.src = 'https://via.placeholder.com/400x400?text=Music+NFT'
+                        }
+                      }}
                     />
                   )}
 
@@ -370,7 +377,7 @@ export default function Home() {
                   )}
 
                   <audio controls className="w-full mb-3">
-                    <source src={nft.audioUrl} type="audio/mpeg" />
+                    <source src={nft.audioUrl.startsWith('http') ? nft.audioUrl : `https://ipfs.io/ipfs/${nft.audioUrl}`} type="audio/mpeg" />
                     Your browser does not support the audio element.
                   </audio>
 
