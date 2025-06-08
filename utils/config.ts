@@ -18,10 +18,11 @@ interface NetworkConfig {
 }
 
 // Network configurations
-aeneid: {
-        rpcProviderUrl: 'https://testnet.storyrpc.io',
-        blockExplorer: 'https://testnet.storyscan.io',
-        protocolExplorer: 'https://testnet.explorer.story.foundation',
+const networkConfigs: Record<NetworkType, NetworkConfig> = {
+    aeneid: {
+        rpcProviderUrl: 'https://aeneid.storyrpc.io',
+        blockExplorer: 'https://aeneid.storyscan.xyz',
+        protocolExplorer: 'https://aeneid.explorer.story.foundation',
         defaultNFTContractAddress: '0x937bef10ba6fb941ed84b8d249abc76031429a9a' as Address,
         defaultSPGNFTContractAddress: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as Address,
         chain: aeneid,
