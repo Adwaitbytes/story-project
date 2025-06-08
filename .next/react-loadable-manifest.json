@@ -24,11 +24,5 @@
     "files": [
       "static/chunks/node_modules_viem__esm_index_js.js"
     ]
-  },
-  "pages/index.tsx -> viem/accounts": {
-    "id": "pages/index.tsx -> viem/accounts",
-    "files": [
-      "static/chunks/node_modules_viem__esm_accounts_index_js.js"
-    ]
   }
 }
