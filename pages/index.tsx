@@ -14,6 +14,8 @@ interface MusicNFT {
   imageUrl: string
   owner: string
   ipId?: string
+  licenseTermsIds?: string[]
+  createdAt?: string
 }
 
 export default function Home() {
@@ -387,9 +389,17 @@ export default function Home() {
                         </div>
                         
                         {music.ipId && (
-                          <p className="ip-id">
-                            <strong>IP ID:</strong> {music.ipId.substring(0, 20)}...
-                          </p>
+                          <div className="blockchain-info">
+                            <p className="ip-id">
+                              <strong>IP ID:</strong> 
+                              <span className="address">{music.ipId}</span>
+                            </p>
+                            {music.licenseTermsIds && music.licenseTermsIds.length > 0 && (
+                              <p className="license-terms">
+                                <strong>License Terms ID:</strong> {music.licenseTermsIds[0]}
+                              </p>
+                            )}
+                          </div>
                         )}
                         
                         <p className="upload-date">

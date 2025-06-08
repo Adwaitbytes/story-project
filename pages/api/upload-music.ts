@@ -143,10 +143,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('Cleanup error:', cleanupError)
     }
 
+    // Register IP Asset
+    let ipId = ''
+    let licenseTermsIds: string[] = []
+    try {
+      console.log('Registering IP Asset...')
+
+      const response = await client.ipAsset.mintAndRegisterIpAssetWithPilTerms({
+        spgNftContract: SPGNFTContractAddress,
+        licenseTermsData: [
+          {
+            terms: createCommercialRemixTerms({ 
+              defaultMintingFee: BigInt(price ? parseFloat(price) * 1e18 : 0), 
+              commercialRevShare: 5 
+            }),
+          },
+        ],
+        ipMetadata: {
+          ipMetadataURI: `https://ipfs.io/ipfs/${metadataUrl}`,
+          ipMetadataHash: `0x${createHash('sha256').update(JSON.stringify(metadata)).digest('hex')}`,
+          nftMetadataURI: `https://ipfs.io/ipfs/${metadataUrl}`,
+          nftMetadataHash: `0x${createHash('sha256').update(JSON.stringify(metadata)).digest('hex')}`,
+        },
+        txOptions: { waitForTransaction: true },
+      })
+
+      ipId = response.ipId!
+      licenseTermsIds = response.licenseTermsIds || []
+
+      console.log('IP Asset registered successfully!')
+      console.log('IP ID:', ipId)
+      console.log('License Terms IDs:', licenseTermsIds)
+      console.log('Transaction Hash:', response.txHash)
+    } catch (ipError) {
+      console.error('IP registration error:', ipError)
+      console.log('Continuing without IP registration...')
+    }
+
     res.status(200).json({
       success: true,
       musicNFT: musicNFT,
-      message: 'Music NFT uploaded successfully'
+      message: 'Music NFT uploaded successfully',
+      ipId: ipId,
     })
 
   } catch (error) {
