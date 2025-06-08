@@ -245,9 +245,13 @@ export default function Home() {
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
       const { http } = await import('viem')
+      const { privateKeyToAccount } = await import('viem/accounts')
+
+      // Get the signer's address
+      const signerAddress = await signer.getAddress()
 
       const clientConfig = {
-        account: await signer.getAddress(),
+        account: signerAddress,
         transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
@@ -337,12 +341,16 @@ export default function Home() {
       // Switch to Story Protocol testnet
       await switchToStoryNetwork()
 
+      // Get the signer first
+      const signer = await provider.getSigner()
+      const signerAddress = await signer.getAddress()
+
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
       const { http } = await import('viem')
 
       const clientConfig = {
-        account: await signer.getAddress(),
+        account: signerAddress,
         transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
@@ -350,7 +358,6 @@ export default function Home() {
       const storyClient = StoryClient.newClient(clientConfig)
 
       // Check IP token balance
-      const signer = await provider.getSigner()
       const userAddress = await signer.getAddress()
 
       // Mint license token
