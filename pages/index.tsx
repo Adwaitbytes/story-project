@@ -150,11 +150,68 @@ export default function Home() {
       } else {
         showMessage(result.error || 'Error uploading music', 'error')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading:', error)
-      showMessage('Error uploading music', 'error')
+      if (error.message?.includes('pending request')) {
+        showMessage('Please check MetaMask - there might be a pending request. Try again in a moment.', 'error')
+      } else if (error.message?.includes('User rejected')) {
+        showMessage('Transaction rejected by user', 'error')
+      } else {
+        showMessage(error.message || 'Error uploading music', 'error')
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const switchToStoryNetwork = async () => {
+    if (!ethereumProvider) {
+      throw new Error('Wallet not connected')
+    }
+
+    const storyChainId = '0x5E9' // 1513 in hex
+    
+    try {
+      // First check current chain
+      const currentChain = await ethereumProvider.request({ method: 'eth_chainId' })
+      if (currentChain === storyChainId) {
+        return // Already on the right network
+      }
+
+      // Try to switch to the chain
+      await ethereumProvider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: storyChainId }],
+      })
+    } catch (switchError: any) {
+      // If the chain doesn't exist, add it
+      if (switchError.code === 4902) {
+        try {
+          await ethereumProvider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: storyChainId,
+              chainName: 'Story Protocol Testnet',
+              nativeCurrency: {
+                name: 'IP',
+                symbol: 'IP',
+                decimals: 18,
+              },
+              rpcUrls: ['https://testnet.storyrpc.io'],
+              blockExplorerUrls: ['https://testnet.storyscan.io'],
+            }],
+          })
+        } catch (addError: any) {
+          if (addError.code === -32002) {
+            throw new Error('Please check MetaMask - there might be a pending request to add the network.')
+          }
+          throw addError
+        }
+      } else if (switchError.code === -32002) {
+        throw new Error('Please check MetaMask - there might be a pending network request.')
+      } else {
+        throw switchError
+      }
     }
   }
 
@@ -166,31 +223,8 @@ export default function Home() {
 
       showMessage('Please sign the transaction to register your IP Asset...', 'success')
 
-      // Switch to Story Protocol testnet if needed
-      try {
-        await ethereumProvider.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x5E9' }], // 1513 in hex (Story Protocol testnet)
-        })
-      } catch (switchError: any) {
-        // If the chain doesn't exist, add it
-        if (switchError.code === 4902) {
-          await ethereumProvider.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x5E9',
-              chainName: 'Story Protocol Testnet',
-              nativeCurrency: {
-                name: 'IP',
-                symbol: 'IP',
-                decimals: 18,
-              },
-              rpcUrls: ['https://testnet.storyrpc.io'],
-              blockExplorerUrls: ['https://testnet.storyscan.io'],
-            }],
-          })
-        }
-      }
+      // Switch to Story Protocol testnet
+      await switchToStoryNetwork()
 
       // Create metadata hash
       const metadata = {
@@ -264,9 +298,15 @@ export default function Home() {
       musicNFT.licenseTermsIds = ipResponse.licenseTermsIds
 
       return ipResponse
-    } catch (error) {
+    } catch (error: any) {
       console.error('IP registration error:', error)
-      showMessage('Failed to register IP Asset. Music uploaded but not registered.', 'error')
+      if (error.message?.includes('pending request')) {
+        showMessage('Please check MetaMask - there might be a pending network request. Music uploaded but IP registration failed.', 'error')
+      } else if (error.message?.includes('User rejected')) {
+        showMessage('Transaction rejected by user. Music uploaded but IP registration failed.', 'error')
+      } else {
+        showMessage(`Failed to register IP Asset: ${error.message || 'Unknown error'}. Music uploaded but not registered.`, 'error')
+      }
       throw error
     }
   }
@@ -297,29 +337,7 @@ export default function Home() {
       showMessage('Please sign the transaction to purchase the license...', 'success')
 
       // Switch to Story Protocol testnet
-      try {
-        await ethereumProvider.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x5E9' }], // 1513 in hex
-        })
-      } catch (switchError: any) {
-        if (switchError.code === 4902) {
-          await ethereumProvider.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x5E9',
-              chainName: 'Story Protocol Testnet',
-              nativeCurrency: {
-                name: 'IP',
-                symbol: 'IP',
-                decimals: 18,
-              },
-              rpcUrls: ['https://testnet.storyrpc.io'],
-              blockExplorerUrls: ['https://testnet.storyscan.io'],
-            }],
-          })
-        }
-      }
+      await switchToStoryNetwork()
 
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
