@@ -243,19 +243,23 @@ export default function Home() {
         ]
       }
 
-      // Create a wallet client for viem
+      // Create proper browser wallet client
       const { createWalletClient, custom, http } = await import('viem')
-      const { aeneid } = await import('@story-protocol/core-sdk')
+      const { aeneid, StoryClient } = await import('@story-protocol/core-sdk')
+
+      // Get accounts from MetaMask
+      const accounts = await ethereumProvider.request({ method: 'eth_accounts' })
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found in MetaMask')
+      }
 
       const walletClient = createWalletClient({
-        account: signerAddress as `0x${string}`,
+        account: accounts[0] as `0x${string}`,
         chain: aeneid,
         transport: custom(ethereumProvider)
       })
 
-      // Create Story Protocol client with the wallet client
-      const { StoryClient } = await import('@story-protocol/core-sdk')
-
+      // Create Story Protocol client with proper configuration
       const clientConfig = {
         account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
@@ -351,19 +355,23 @@ export default function Home() {
       const signer = await provider.getSigner()
       const signerAddress = await signer.getAddress()
 
-      // Create a wallet client for viem
+      // Create proper browser wallet client
       const { createWalletClient, custom, http } = await import('viem')
-      const { aeneid } = await import('@story-protocol/core-sdk')
+      const { aeneid, StoryClient } = await import('@story-protocol/core-sdk')
+
+      // Get accounts from MetaMask
+      const accounts = await ethereumProvider.request({ method: 'eth_accounts' })
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts found in MetaMask')
+      }
 
       const walletClient = createWalletClient({
-        account: signerAddress as `0x${string}`,
+        account: accounts[0] as `0x${string}`,
         chain: aeneid,
         transport: custom(ethereumProvider)
       })
 
-      // Create Story Protocol client with the wallet client
-      const { StoryClient } = await import('@story-protocol/core-sdk')
-
+      // Create Story Protocol client with proper configuration
       const clientConfig = {
         account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
