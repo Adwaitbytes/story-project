@@ -226,6 +226,10 @@ export default function Home() {
       // Switch to Story Protocol testnet
       await switchToStoryNetwork()
 
+      // Get the signer and their address
+      const signer = await provider.getSigner()
+      const signerAddress = await signer.getAddress()
+
       // Create metadata hash
       const metadata = {
         name: musicNFT.title,
@@ -239,19 +243,21 @@ export default function Home() {
         ]
       }
 
-      // Register with client-side wallet signing
-      const signer = await provider.getSigner()
+      // Create a wallet client for viem
+      const { createWalletClient, custom, http } = await import('viem')
+      const { aeneid } = await import('@story-protocol/core-sdk')
 
-      // Create Story Protocol client for browser
+      const walletClient = createWalletClient({
+        account: signerAddress as `0x${string}`,
+        chain: aeneid,
+        transport: custom(ethereumProvider)
+      })
+
+      // Create Story Protocol client with the wallet client
       const { StoryClient } = await import('@story-protocol/core-sdk')
-      const { http } = await import('viem')
-      const { privateKeyToAccount } = await import('viem/accounts')
-
-      // Get the signer's address
-      const signerAddress = await signer.getAddress()
 
       const clientConfig = {
-        account: signerAddress,
+        account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
@@ -341,24 +347,30 @@ export default function Home() {
       // Switch to Story Protocol testnet
       await switchToStoryNetwork()
 
-      // Get the signer first
+      // Get the signer and their address
       const signer = await provider.getSigner()
       const signerAddress = await signer.getAddress()
 
-      // Create Story Protocol client for browser
+      // Create a wallet client for viem
+      const { createWalletClient, custom, http } = await import('viem')
+      const { aeneid } = await import('@story-protocol/core-sdk')
+
+      const walletClient = createWalletClient({
+        account: signerAddress as `0x${string}`,
+        chain: aeneid,
+        transport: custom(ethereumProvider)
+      })
+
+      // Create Story Protocol client with the wallet client
       const { StoryClient } = await import('@story-protocol/core-sdk')
-      const { http } = await import('viem')
 
       const clientConfig = {
-        account: signerAddress,
+        account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
 
       const storyClient = StoryClient.newClient(clientConfig)
-
-      // Check IP token balance
-      const userAddress = await signer.getAddress()
 
       // Mint license token
       const licensePrice = BigInt(parseFloat(musicNFT.price) * 1e18)
