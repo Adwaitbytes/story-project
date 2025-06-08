@@ -244,13 +244,11 @@ export default function Home() {
 
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
+      const { http } = await import('viem')
 
       const clientConfig = {
-        transport: {
-          rpcUrls: {
-            1315: 'https://aeneid.storyrpc.io'
-          }
-        },
+        account: await signer.getAddress(),
+        transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
 
@@ -341,13 +339,11 @@ export default function Home() {
 
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
+      const { http } = await import('viem')
 
       const clientConfig = {
-        transport: {
-          rpcUrls: {
-            1315: 'https://aeneid.storyrpc.io'
-          }
-        },
+        account: await signer.getAddress(),
+        transport: http('https://aeneid.storyrpc.io'),
         chainId: 'aeneid' as const
       }
 
