@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import formidable from 'formidable'
 import fs from 'fs'
+import path from 'path'
 import { uploadFileToIPFS, uploadJSONToIPFS } from '../../utils/functions/uploadToIpfs'
 import { client } from '../../utils/config'
 import { createCommercialRemixTerms, SPGNFTContractAddress } from '../../utils/utils'
@@ -14,8 +15,32 @@ export const config = {
   },
 }
 
-// Simple in-memory storage (replace with database in production)
-export let musicStorage: any[] = []
+// Persistent file storage
+const STORAGE_FILE = path.join(process.cwd(), 'music-storage.json')
+
+function loadMusicStorage(): any[] {
+  try {
+    if (fs.existsSync(STORAGE_FILE)) {
+      const data = fs.readFileSync(STORAGE_FILE, 'utf8')
+      return JSON.parse(data)
+    }
+  } catch (error) {
+    console.error('Error loading music storage:', error)
+  }
+  return []
+}
+
+function saveMusicStorage(music: any[]): void {
+  try {
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(music, null, 2))
+  } catch (error) {
+    console.error('Error saving music storage:', error)
+  }
+}
+
+export function getMusicStorage(): any[] {
+  return loadMusicStorage()
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -104,8 +129,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       createdAt: new Date().toISOString()
     }
 
-    // Store the NFT data
-    musicStorage.push(musicNFT)
+    // Store the NFT data persistently
+    const currentMusic = loadMusicStorage()
+    currentMusic.push(musicNFT)
+    saveMusicStorage(currentMusic)
     console.log('Music NFT stored:', musicNFT)
 
     // Clean up temporary files

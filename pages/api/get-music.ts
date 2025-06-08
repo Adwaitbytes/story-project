@@ -1,6 +1,6 @@
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import { musicStorage } from './upload-music'
+import { getMusicStorage } from './upload-music'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -8,6 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const musicStorage = getMusicStorage()
     res.status(200).json({
       success: true,
       music: musicStorage || [],
