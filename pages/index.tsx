@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { ethers } from 'ethers'
+import { createHash } from 'crypto'
 
 interface MusicNFT {
   id: string
@@ -114,6 +115,7 @@ export default function Home() {
     setLoading(true)
     
     try {
+      // Step 1: Upload to IPFS and create NFT metadata
       const formData = new FormData()
       formData.append('audioFile', audioFile)
       if (imageFile) formData.append('imageFile', imageFile)
@@ -131,7 +133,12 @@ export default function Home() {
       const result = await response.json()
 
       if (response.ok) {
-        showMessage('Music NFT uploaded and registered successfully!', 'success')
+        showMessage('Music uploaded to IPFS! Now registering IP Asset...', 'success')
+        
+        // Step 2: Register IP Asset with user's wallet
+        await registerIPAsset(result.musicNFT)
+        
+        showMessage('Music NFT uploaded and IP registered successfully!', 'success')
         // Reset form
         setTitle('')
         setArtist('')
@@ -152,9 +159,127 @@ export default function Home() {
     }
   }
 
+  const registerIPAsset = async (musicNFT: any) => {
+    try {
+      if (!provider || !ethereumProvider) {
+        throw new Error('Wallet not connected')
+      }
+
+      showMessage('Please sign the transaction to register your IP Asset...', 'success')
+
+      // Switch to Story Protocol testnet if needed
+      try {
+        await ethereumProvider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x59A1' }], // 1513 in hex (Story Protocol testnet)
+        })
+      } catch (switchError: any) {
+        // If the chain doesn't exist, add it
+        if (switchError.code === 4902) {
+          await ethereumProvider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x59A1',
+              chainName: 'Story Protocol Testnet',
+              nativeCurrency: {
+                name: 'IP',
+                symbol: 'IP',
+                decimals: 18,
+              },
+              rpcUrls: ['https://testnet.storyrpc.io'],
+              blockExplorerUrls: ['https://testnet.storyscan.io'],
+            }],
+          })
+        }
+      }
+
+      // Create metadata hash
+      const metadata = {
+        name: musicNFT.title,
+        description: musicNFT.description,
+        image: musicNFT.imageUrl,
+        audio: musicNFT.audioUrl,
+        attributes: [
+          { trait_type: 'Artist', value: musicNFT.artist },
+          { trait_type: 'Title', value: musicNFT.title },
+          { trait_type: 'License Price', value: musicNFT.price || '0' }
+        ]
+      }
+
+      // Register with client-side wallet signing
+      const signer = await provider.getSigner()
+      
+      // Create Story Protocol client for browser
+      const { StoryClient } = await import('@story-protocol/core-sdk')
+      
+      const clientConfig = {
+        transport: {
+          rpcUrls: {
+            1513: 'https://testnet.storyrpc.io'
+          }
+        },
+        chainId: 'aeneid' as const
+      }
+
+      const storyClient = StoryClient.newClient(clientConfig)
+
+      const licensePrice = musicNFT.price ? parseFloat(musicNFT.price) * 1e18 : 0
+
+      const ipResponse = await storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
+        spgNftContract: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as `0x${string}`,
+        licenseTermsData: [
+          {
+            terms: {
+              transferable: true,
+              royaltyPolicy: '0x0000000000000000000000000000000000000000' as `0x${string}`,
+              defaultMintingFee: BigInt(licensePrice),
+              expiration: BigInt(0),
+              commercialUse: true,
+              commercialAttribution: false,
+              commercializerChecker: '0x0000000000000000000000000000000000000000' as `0x${string}`,
+              commercializerCheckerData: '0x' as `0x${string}`,
+              commercialRevShare: 500, // 5%
+              derivativesAllowed: true,
+              derivativesAttribution: true,
+              derivativesApproval: false,
+              derivativesReciprocal: true,
+              territory: [],
+              distributionChannels: [],
+              contentRestrictions: []
+            }
+          }
+        ],
+        ipMetadata: {
+          ipMetadataURI: `https://ipfs.io/ipfs/${musicNFT.metadataUrl}`,
+          ipMetadataHash: `0x${createHash('sha256').update(JSON.stringify(metadata)).digest('hex')}`,
+          nftMetadataURI: `https://ipfs.io/ipfs/${musicNFT.metadataUrl}`,
+          nftMetadataHash: `0x${createHash('sha256').update(JSON.stringify(metadata)).digest('hex')}`
+        },
+        txOptions: { waitForTransaction: true }
+      })
+
+      console.log('IP Asset registered:', ipResponse)
+      
+      // Update stored music with IP information
+      musicNFT.ipId = ipResponse.ipId
+      musicNFT.licenseTermsIds = ipResponse.licenseTermsIds
+
+      return ipResponse
+    } catch (error) {
+      console.error('IP registration error:', error)
+      showMessage('Failed to register IP Asset. Music uploaded but not registered.', 'error')
+      throw error
+    }
+  }
+
   const purchaseLicense = async (musicNFT: MusicNFT) => {
     if (!account) {
       showMessage('Please connect your wallet first', 'error')
+      return
+    }
+
+    if (!musicNFT.ipId) {
+      showMessage('This music is not registered as an IP Asset yet', 'error')
       return
     }
 
@@ -166,33 +291,77 @@ export default function Home() {
     setLoading(true)
     
     try {
-      // For now, we'll simulate a purchase since the IP registration isn't working yet
-      showMessage(`License for "${musicNFT.title}" purchased for ${musicNFT.price} WIP!`, 'success')
+      if (!provider || !ethereumProvider) {
+        throw new Error('Wallet not connected')
+      }
+
+      showMessage('Please sign the transaction to purchase the license...', 'success')
+
+      // Switch to Story Protocol testnet
+      try {
+        await ethereumProvider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x59A1' }], // 1513 in hex
+        })
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          await ethereumProvider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x59A1',
+              chainName: 'Story Protocol Testnet',
+              nativeCurrency: {
+                name: 'IP',
+                symbol: 'IP',
+                decimals: 18,
+              },
+              rpcUrls: ['https://testnet.storyrpc.io'],
+              blockExplorerUrls: ['https://testnet.storyscan.io'],
+            }],
+          })
+        }
+      }
+
+      // Create Story Protocol client for browser
+      const { StoryClient } = await import('@story-protocol/core-sdk')
       
-      // TODO: Implement actual purchase logic with Story Protocol when ready
-      // const response = await fetch('/api/purchase-license', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     ipId: musicNFT.ipId,
-      //     buyer: account,
-      //     amount: 1,
-      //     price: musicNFT.price
-      //   }),
-      // })
+      const clientConfig = {
+        transport: {
+          rpcUrls: {
+            1513: 'https://testnet.storyrpc.io'
+          }
+        },
+        chainId: 'aeneid' as const
+      }
 
-      // const result = await response.json()
+      const storyClient = StoryClient.newClient(clientConfig)
 
-      // if (response.ok) {
-      //   showMessage('License purchased successfully!', 'success')
-      // } else {
-      //   showMessage(result.error || 'Error purchasing license', 'error')
-      // }
-    } catch (error) {
+      // Check IP token balance
+      const signer = await provider.getSigner()
+      const userAddress = await signer.getAddress()
+
+      // Mint license token
+      const licensePrice = BigInt(parseFloat(musicNFT.price) * 1e18)
+      
+      const mintResponse = await storyClient.license.mintLicenseTokens({
+        licenseTermsId: musicNFT.licenseTermsIds?.[0] || '1',
+        licensorIpId: musicNFT.ipId as `0x${string}`,
+        amount: 1,
+        maxMintingFee: licensePrice,
+        maxRevenueShare: 100,
+        txOptions: { waitForTransaction: true }
+      })
+
+      console.log('License purchased:', mintResponse)
+      showMessage(`License for "${musicNFT.title}" purchased successfully for ${musicNFT.price} IP tokens!`, 'success')
+      
+    } catch (error: any) {
       console.error('Error purchasing license:', error)
-      showMessage('Error purchasing license', 'error')
+      if (error.message?.includes('insufficient funds')) {
+        showMessage(`Insufficient IP tokens. You need ${musicNFT.price} IP tokens to purchase this license.`, 'error')
+      } else {
+        showMessage('Error purchasing license. Please try again.', 'error')
+      }
     } finally {
       setLoading(false)
     }
@@ -287,7 +456,7 @@ export default function Home() {
                 </div>
 
                 <div className="form-group">
-                  <label>License Price (in WIP tokens)</label>
+                  <label>License Price (in IP tokens)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -370,7 +539,7 @@ export default function Home() {
                         
                         <div className="price-and-actions">
                           {music.price && parseFloat(music.price) > 0 && (
-                            <p className="price"><strong>License Price:</strong> {music.price} WIP</p>
+                            <p className="price"><strong>License Price:</strong> {music.price} IP</p>
                           )}
                           
                           <div className="action-buttons">
