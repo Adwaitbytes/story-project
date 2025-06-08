@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import detectEthereumProvider from '@metamask/detect-provider'
@@ -60,7 +59,7 @@ export default function Home() {
   const initializeWeb3 = async () => {
     try {
       const ethereumProvider = await detectEthereumProvider()
-      
+
       if (ethereumProvider) {
         const ethersProvider = new ethers.BrowserProvider(ethereumProvider as any)
         setProvider(ethersProvider)
@@ -101,7 +100,7 @@ export default function Home() {
 
   const uploadMusicNFT = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!account) {
       showMessage('Please connect your wallet first', 'error')
       return
@@ -113,7 +112,7 @@ export default function Home() {
     }
 
     setLoading(true)
-    
+
     try {
       // Step 1: Upload to IPFS and create NFT metadata
       const formData = new FormData()
@@ -134,10 +133,10 @@ export default function Home() {
 
       if (response.ok) {
         showMessage('Music uploaded to IPFS! Now registering IP Asset...', 'success')
-        
+
         // Step 2: Register IP Asset with user's wallet
         await registerIPAsset(result.musicNFT)
-        
+
         showMessage('Music NFT uploaded and IP registered successfully!', 'success')
         // Reset form
         setTitle('')
@@ -208,14 +207,14 @@ export default function Home() {
 
       // Register with client-side wallet signing
       const signer = await provider.getSigner()
-      
+
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
-      
+
       const clientConfig = {
         transport: {
           rpcUrls: {
-            1513: 'https://testnet.storyrpc.io'
+            1315: 'https://aeneid.storyrpc.io'
           }
         },
         chainId: 'aeneid' as const
@@ -259,7 +258,7 @@ export default function Home() {
       })
 
       console.log('IP Asset registered:', ipResponse)
-      
+
       // Update stored music with IP information
       musicNFT.ipId = ipResponse.ipId
       musicNFT.licenseTermsIds = ipResponse.licenseTermsIds
@@ -289,7 +288,7 @@ export default function Home() {
     }
 
     setLoading(true)
-    
+
     try {
       if (!provider || !ethereumProvider) {
         throw new Error('Wallet not connected')
@@ -324,11 +323,11 @@ export default function Home() {
 
       // Create Story Protocol client for browser
       const { StoryClient } = await import('@story-protocol/core-sdk')
-      
+
       const clientConfig = {
         transport: {
           rpcUrls: {
-            1513: 'https://testnet.storyrpc.io'
+            1315: 'https://aeneid.storyrpc.io'
           }
         },
         chainId: 'aeneid' as const
@@ -342,7 +341,7 @@ export default function Home() {
 
       // Mint license token
       const licensePrice = BigInt(parseFloat(musicNFT.price) * 1e18)
-      
+
       const mintResponse = await storyClient.license.mintLicenseTokens({
         licenseTermsId: musicNFT.licenseTermsIds?.[0] || '1',
         licensorIpId: musicNFT.ipId as `0x${string}`,
@@ -354,7 +353,7 @@ export default function Home() {
 
       console.log('License purchased:', mintResponse)
       showMessage(`License for "${musicNFT.title}" purchased successfully for ${musicNFT.price} IP tokens!`, 'success')
-      
+
     } catch (error: any) {
       console.error('Error purchasing license:', error)
       if (error.message?.includes('insufficient funds')) {
@@ -371,7 +370,7 @@ export default function Home() {
     try {
       const response = await fetch('/api/get-music')
       const data = await response.json()
-      
+
       if (response.ok) {
         setMusicNFTs(data.music || [])
       }
@@ -493,7 +492,7 @@ export default function Home() {
 
             <div>
               <h2>Music Library ({musicNFTs.length} tracks)</h2>
-              
+
               {musicNFTs.length > 0 && (
                 <div className="search-bar">
                   <input
@@ -505,7 +504,7 @@ export default function Home() {
                   />
                 </div>
               )}
-              
+
               {musicNFTs.length === 0 ? (
                 <p>No music NFTs available yet. Upload the first one!</p>
               ) : filteredMusicNFTs.length === 0 ? (
@@ -521,13 +520,13 @@ export default function Home() {
                           className="music-image"
                         />
                       )}
-                      
+
                       <div className="music-info">
                         <h3>{music.title}</h3>
                         <p className="artist-name"><strong>Artist:</strong> {music.artist}</p>
                         <p className="owner-info"><strong>Owner:</strong> {music.owner.substring(0, 10)}...</p>
                         {music.description && <p className="description">{music.description}</p>}
-                        
+
                         {music.audioUrl && (
                           <div className="audio-player">
                             <audio controls>
@@ -536,12 +535,12 @@ export default function Home() {
                             </audio>
                           </div>
                         )}
-                        
+
                         <div className="price-and-actions">
                           {music.price && parseFloat(music.price) > 0 && (
                             <p className="price"><strong>License Price:</strong> {music.price} IP</p>
                           )}
-                          
+
                           <div className="action-buttons">
                             {music.owner.toLowerCase() !== account.toLowerCase() ? (
                               <button 
@@ -556,7 +555,7 @@ export default function Home() {
                             )}
                           </div>
                         </div>
-                        
+
                         {music.ipId && (
                           <div className="blockchain-info">
                             <p className="ip-id">
@@ -570,7 +569,7 @@ export default function Home() {
                             )}
                           </div>
                         )}
-                        
+
                         <p className="upload-date">
                           <strong>Created:</strong> {new Date(music.createdAt || Date.now()).toLocaleDateString()}
                         </p>
