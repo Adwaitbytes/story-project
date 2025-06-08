@@ -291,7 +291,7 @@ export default function Home() {
           {
             terms: {
               transferable: true,
-              royaltyPolicy: '0x7856C4838A8d806A2ddDF8f8a2b3B1D394bf1b30' as `0x${string}`,
+              royaltyPolicy: '0x7856c4838a8d806a2dddf8f8a2b3b1d394bf1b30' as `0x${string}`,
               defaultMintingFee: BigInt(licensePrice),
               expiration: BigInt(0),
               commercialUse: true,
