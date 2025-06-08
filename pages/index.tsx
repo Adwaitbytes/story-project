@@ -226,10 +226,6 @@ export default function Home() {
       // Switch to Story Protocol testnet
       await switchToStoryNetwork()
 
-      // Get the signer and their address
-      const signer = await provider.getSigner()
-      const signerAddress = await signer.getAddress()
-
       // Create metadata hash
       const metadata = {
         name: musicNFT.title,
@@ -243,23 +239,40 @@ export default function Home() {
         ]
       }
 
-      // Create proper browser wallet client
+      // Use ethers.js signer approach
+      const signer = await provider.getSigner()
+      const signerAddress = await signer.getAddress()
+
+      // Import required modules
       const { createWalletClient, custom, http } = await import('viem')
       const { aeneid, StoryClient } = await import('@story-protocol/core-sdk')
 
-      // Get accounts from MetaMask
-      const accounts = await ethereumProvider.request({ method: 'eth_accounts' })
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found in MetaMask')
-      }
-
+      // Create wallet client using a different approach - using the connected account directly
       const walletClient = createWalletClient({
-        account: accounts[0] as `0x${string}`,
+        account: signerAddress as `0x${string}`,
         chain: aeneid,
-        transport: custom(ethereumProvider)
+        transport: custom({
+          request: async ({ method, params }) => {
+            // Use ethers provider for all requests
+            if (method === 'eth_sendTransaction') {
+              const transaction = params[0]
+              const tx = await signer.sendTransaction(transaction)
+              return tx.hash
+            }
+            
+            // For other methods, use the ethereum provider
+            return await ethereumProvider.request({ method, params })
+          }
+        })
       })
 
-      // Create Story Protocol client with proper configuration
+      // Verify account is properly set
+      console.log('Wallet client account:', walletClient.account)
+      if (!walletClient.account) {
+        throw new Error('Failed to get wallet account')
+      }
+
+      // Create Story Protocol client
       const clientConfig = {
         account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
@@ -269,6 +282,8 @@ export default function Home() {
       const storyClient = StoryClient.newClient(clientConfig)
 
       const licensePrice = musicNFT.price ? parseFloat(musicNFT.price) * 1e18 : 0
+
+      console.log('Registering IP Asset with address:', walletClient.account.address)
 
       const ipResponse = await storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
         spgNftContract: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc',
@@ -355,23 +370,30 @@ export default function Home() {
       const signer = await provider.getSigner()
       const signerAddress = await signer.getAddress()
 
-      // Create proper browser wallet client
+      // Create wallet client using ethers signer approach
       const { createWalletClient, custom, http } = await import('viem')
       const { aeneid, StoryClient } = await import('@story-protocol/core-sdk')
 
-      // Get accounts from MetaMask
-      const accounts = await ethereumProvider.request({ method: 'eth_accounts' })
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found in MetaMask')
-      }
-
       const walletClient = createWalletClient({
-        account: accounts[0] as `0x${string}`,
+        account: signerAddress as `0x${string}`,
         chain: aeneid,
-        transport: custom(ethereumProvider)
+        transport: custom({
+          request: async ({ method, params }) => {
+            if (method === 'eth_sendTransaction') {
+              const transaction = params[0]
+              const tx = await signer.sendTransaction(transaction)
+              return tx.hash
+            }
+            return await ethereumProvider.request({ method, params })
+          }
+        })
       })
 
-      // Create Story Protocol client with proper configuration
+      if (!walletClient.account) {
+        throw new Error('Failed to get wallet account for license purchase')
+      }
+
+      // Create Story Protocol client
       const clientConfig = {
         account: walletClient.account,
         transport: http('https://aeneid.storyrpc.io'),
