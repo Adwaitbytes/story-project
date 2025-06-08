@@ -1,0 +1,95 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+websocket.js:39 [HMR] connected
+index.tsx:269 Wallet client account: {address: '0x7c2568868da818FF1Ef9EeB1c34e7eCe310c29fd', type: 'json-rpc'}address: "0x7c2568868da818FF1Ef9EeB1c34e7eCe310c29fd"type: "json-rpc"[[Prototype]]: Object
+index.tsx:281 Registering IP Asset with address: 0x7c2568868da818FF1Ef9EeB1c34e7eCe310c29fd
+index.tsx:323 IP registration error: Error: Failed to mint and register IP and attach PIL terms: Invalid address: undefined.
+    at validateAddress (story-protocol-core-sdk.esm.js:560:11)
+    at _callee$ (story-protocol-core-sdk.esm.js:3111:17)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at eval (story-protocol-core-sdk.esm.js:328:12)
+    at _validateLicenseTerms (story-protocol-core-sdk.esm.js:3168:32)
+    at validateLicenseTerms (story-protocol-core-sdk.esm.js:3085:32)
+    at _callee2$ (story-protocol-core-sdk.esm.js:4303:18)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at eval (story-protocol-core-sdk.esm.js:328:12)
+    at validateLicenseTermsData (story-protocol-core-sdk.esm.js:4334:18)
+    at IPAssetClient._callee7$ (story-protocol-core-sdk.esm.js:6571:22)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at IPAssetClient.eval (story-protocol-core-sdk.esm.js:328:12)
+    at IPAssetClient.mintAndRegisterIpAssetWithPilTerms (story-protocol-core-sdk.esm.js:6636:52)
+    at registerIPAsset (index.tsx:282:58)
+    at async uploadMusicNFT (index.tsx:124:17)
+console.error @ hydration-error-info.js:63
+window.console.error @ setup-hydration-warning.js:18
+registerIPAsset @ index.tsx:323
+await in registerIPAsset
+uploadMusicNFT @ index.tsx:124
+await in uploadMusicNFT
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+eval @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26174
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430Understand this error
+index.tsx:140 Error uploading: Error: Failed to mint and register IP and attach PIL terms: Invalid address: undefined.
+    at validateAddress (story-protocol-core-sdk.esm.js:560:11)
+    at _callee$ (story-protocol-core-sdk.esm.js:3111:17)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at eval (story-protocol-core-sdk.esm.js:328:12)
+    at _validateLicenseTerms (story-protocol-core-sdk.esm.js:3168:32)
+    at validateLicenseTerms (story-protocol-core-sdk.esm.js:3085:32)
+    at _callee2$ (story-protocol-core-sdk.esm.js:4303:18)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at eval (story-protocol-core-sdk.esm.js:328:12)
+    at validateLicenseTermsData (story-protocol-core-sdk.esm.js:4334:18)
+    at IPAssetClient._callee7$ (story-protocol-core-sdk.esm.js:6571:22)
+    at s (story-protocol-core-sdk.esm.js:117:16)
+    at Generator.eval (story-protocol-core-sdk.esm.js:100:19)
+    at Generator.eval [as next] (story-protocol-core-sdk.esm.js:142:21)
+    at asyncGeneratorStep (story-protocol-core-sdk.esm.js:317:17)
+    at _next (story-protocol-core-sdk.esm.js:331:9)
+    at eval (story-protocol-core-sdk.esm.js:336:7)
+    at new Promise (<anonymous>)
+    at IPAssetClient.eval (story-protocol-core-sdk.esm.js:328:12)
+    at IPAssetClient.mintAndRegisterIpAssetWithPilTerms (story-protocol-core-sdk.esm.js:6636:52)
+    at registerIPAsset (index.tsx:282:58)
+    at async uploadMusicNFT (index.tsx:124:17)
