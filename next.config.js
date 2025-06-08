@@ -3,6 +3,9 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  experimental: {
+    appDir: true,
+  },
   env: {
     WALLET_PRIVATE_KEY: process.env.WALLET_PRIVATE_KEY,
     PINATA_JWT: process.env.PINATA_JWT,
