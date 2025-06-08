@@ -178,7 +178,7 @@ export default function Home() {
           await ethereumProvider.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x59A1',
+              chainId: '0x523',
               chainName: 'Story Protocol Testnet',
               nativeCurrency: {
                 name: 'IP',
