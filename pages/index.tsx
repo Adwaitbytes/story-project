@@ -286,19 +286,19 @@ export default function Home() {
       console.log('Registering IP Asset with address:', walletClient.account.address)
 
       const ipResponse = await storyClient.ipAsset.mintAndRegisterIpAssetWithPilTerms({
-        spgNftContract: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc',
+        spgNftContract: '0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc' as `0x${string}`,
         licenseTermsData: [
           {
             terms: {
               transferable: true,
-              royaltyPolicy: '0x0000000000000000000000000000000000000000' as `0x${string}`,
+              royaltyPolicy: '0x7856C4838A8d806A2ddDF8f8a2b3B1D394bf1b30' as `0x${string}`,
               defaultMintingFee: BigInt(licensePrice),
               expiration: BigInt(0),
               commercialUse: true,
               commercialAttribution: false,
               commercializerChecker: '0x0000000000000000000000000000000000000000' as `0x${string}`,
               commercializerCheckerData: '0x' as `0x${string}`,
-              commercialRevShare: 500, // 5%
+              commercialRevShare: 500,
               derivativesAllowed: true,
               derivativesAttribution: true,
               derivativesApproval: false,
