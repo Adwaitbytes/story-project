@@ -170,7 +170,7 @@ export default function Home() {
       try {
         await ethereumProvider.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x59A1' }], // 1513 in hex (Story Protocol testnet)
+          params: [{ chainId: '0x5E9' }], // 1513 in hex (Story Protocol testnet)
         })
       } catch (switchError: any) {
         // If the chain doesn't exist, add it
@@ -178,7 +178,7 @@ export default function Home() {
           await ethereumProvider.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x523',
+              chainId: '0x5E9',
               chainName: 'Story Protocol Testnet',
               nativeCurrency: {
                 name: 'IP',
@@ -214,10 +214,10 @@ export default function Home() {
       const clientConfig = {
         transport: {
           rpcUrls: {
-            1315: 'https://aeneid.storyrpc.io'
+            1513: 'https://testnet.storyrpc.io'
           }
         },
-        chainId: 'aeneid' as const
+        chainId: 'iliad' as const
       }
 
       const storyClient = StoryClient.newClient(clientConfig)
@@ -300,14 +300,14 @@ export default function Home() {
       try {
         await ethereumProvider.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x59A1' }], // 1513 in hex
+          params: [{ chainId: '0x5E9' }], // 1513 in hex
         })
       } catch (switchError: any) {
         if (switchError.code === 4902) {
           await ethereumProvider.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x59A1',
+              chainId: '0x5E9',
               chainName: 'Story Protocol Testnet',
               nativeCurrency: {
                 name: 'IP',
@@ -327,10 +327,10 @@ export default function Home() {
       const clientConfig = {
         transport: {
           rpcUrls: {
-            1315: 'https://aeneid.storyrpc.io'
+            1513: 'https://testnet.storyrpc.io'
           }
         },
-        chainId: 'aeneid' as const
+        chainId: 'iliad' as const
       }
 
       const storyClient = StoryClient.newClient(clientConfig)
