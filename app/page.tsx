@@ -91,7 +91,9 @@ export default function Home() {
 
   // Listen for account changes
   useEffect(() => {
-    if (typeof window.ethereum !== 'undefined') {
+    const ethereum = typeof window !== 'undefined' ? window.ethereum : undefined;
+    
+    if (ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         console.log('👤 Account changed:', accounts)
         if (accounts.length === 0) {
@@ -104,9 +106,9 @@ export default function Home() {
         }
       }
 
-      window.ethereum.on('accountsChanged', handleAccountsChanged)
+      ethereum.on('accountsChanged', handleAccountsChanged)
       return () => {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
+        ethereum.removeListener('accountsChanged', handleAccountsChanged)
       }
     }
   }, [])

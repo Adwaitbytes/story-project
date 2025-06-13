@@ -1,8 +1,9 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
+  images: {
+    domains: ['ipfs.io', 'gateway.ipfs.io'],
+  },
   
   env: {
     WALLET_PRIVATE_KEY: process.env.WALLET_PRIVATE_KEY,
