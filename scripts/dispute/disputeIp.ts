@@ -2,14 +2,14 @@ import { Address, parseEther } from 'viem'
 import { client } from '../../utils/config'
 import * as sha256 from 'multiformats/hashes/sha2'
 import { CID } from 'multiformats/cid'
-import { uploadTextToIPFS } from '../../utils/functions/uploadToIpfs'
+import { uploadJSONToIPFS } from '../../utils/functions/uploadToIpfs'
 
 // TODO: Replace with your own IP ID and fill out your evidence
-const IP_ID: Address = '0x876B03d1e756C5C24D4b9A1080387098Fcc380f5'
+const IP_ID: Address = '0x3EfFFd7caCbFdD00F05A370Ed57A8977d1c7070C'
 const EVIDENCE: string = 'Fill out your evidence here.'
 
 const main = async function () {
-    const disputeHash = await uploadTextToIPFS(EVIDENCE)
+    const disputeHash = await uploadJSONToIPFS({ evidence: EVIDENCE })
     console.log(`Dispute evidence uploaded to IPFS: ${disputeHash}`)
 
     // Raise a Dispute

@@ -24,6 +24,24 @@ const nextConfig = {
       },
     ]
   },
+  // Exclude scripts directory from build
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
+  },
+  // Exclude scripts from build
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  experimental: {
+    // This will exclude the scripts directory from the build
+    transpilePackages: [],
+  },
 }
 
 module.exports = nextConfig
