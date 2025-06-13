@@ -1,7 +1,9 @@
-
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import Navigation from './components/Navigation'
+import MusicPlayer from './components/MusicPlayer'
 
 // Types
 interface MusicNFT {
@@ -25,17 +27,8 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
-
-  // Form states
-  const [title, setTitle] = useState<string>('')
-  const [artist, setArtist] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [price, setPrice] = useState<string>('')
-  const [audioFile, setAudioFile] = useState<File | null>(null)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-
-  // Music NFTs
   const [musicNFTs, setMusicNFTs] = useState<MusicNFT[]>([])
+  const [selectedTrack, setSelectedTrack] = useState<MusicNFT | null>(null)
 
   // Connect wallet
   const connectWallet = async () => {
@@ -45,7 +38,6 @@ export default function Home() {
       if (typeof window.ethereum !== 'undefined') {
         console.log('✅ MetaMask detected')
         
-        // Request account access
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         })
@@ -57,7 +49,6 @@ export default function Home() {
           console.log('🎉 Wallet connected successfully:', accounts[0])
           showMessage('Wallet connected successfully!', 'success')
           
-          // Check network
           const chainId = await window.ethereum.request({ method: 'eth_chainId' })
           console.log('🌐 Current chain ID:', chainId)
         }
@@ -84,89 +75,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error('💥 Error loading music NFTs:', error)
-    }
-  }
-
-  // Upload music and register IP
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!connected) {
-      showMessage('Please connect your wallet first', 'error')
-      return
-    }
-
-    if (!audioFile || !title || !artist) {
-      showMessage('Please fill in all required fields', 'error')
-      return
-    }
-
-    setLoading(true)
-    console.log('🚀 Starting upload and IP registration process...')
-    console.log('📊 Form data:', { title, artist, description, price, owner: account })
-
-    try {
-      // Step 1: Create FormData
-      console.log('📦 Step 1: Preparing form data...')
-      const formData = new FormData()
-      formData.append('title', title)
-      formData.append('artist', artist)
-      formData.append('description', description)
-      formData.append('price', price)
-      formData.append('owner', account)
-      formData.append('audioFile', audioFile)
-      if (imageFile) {
-        formData.append('imageFile', imageFile)
-        console.log('🖼️ Image file included:', imageFile.name)
-      }
-
-      console.log('📤 Step 2: Uploading to IPFS and registering IP...')
-      
-      // Step 2: Upload and register
-      const response = await fetch('/api/upload-music', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-      console.log('📨 API Response:', data)
-
-      if (data.success) {
-        console.log('🎉 SUCCESS! Music NFT uploaded and IP registered!')
-        console.log('🆔 IP ID:', data.ipId)
-        console.log('🔗 Transaction Hash:', data.txHash)
-        console.log('🌐 Explorer URL:', data.explorerUrl)
-        
-        showMessage(
-          `Music NFT uploaded and IP registered successfully! IP ID: ${data.ipId}`, 
-          'success'
-        )
-        
-        // Reset form
-        setTitle('')
-        setArtist('')
-        setDescription('')
-        setPrice('')
-        setAudioFile(null)
-        setImageFile(null)
-        
-        // Clear file inputs
-        const audioInput = document.querySelector('input[type="file"][accept="audio/*"]') as HTMLInputElement
-        const imageInput = document.querySelector('input[type="file"][accept="image/*"]') as HTMLInputElement
-        if (audioInput) audioInput.value = ''
-        if (imageInput) imageInput.value = ''
-        
-        // Refresh music list
-        loadMusicNFTs()
-      } else {
-        console.error('❌ Upload failed:', data.error)
-        showMessage(data.error || 'Upload failed', 'error')
-      }
-    } catch (error) {
-      console.error('💥 Upload error:', error)
-      showMessage('Upload failed', 'error')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -204,196 +112,178 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-blue-600 text-white py-6 mb-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center">🎵 Story Music dApp</h1>
-          <p className="text-center mt-2 text-blue-100">Upload music, register IP on Story Protocol</p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Messages */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            messageType === 'success' 
-              ? 'bg-green-100 text-green-800 border border-green-200' 
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
-            {message}
-          </div>
-        )}
-
-        {/* Wallet Connection */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">🦊 MetaMask Connection</h2>
-          {!connected ? (
-            <div>
-              <p className="text-gray-600 mb-4">Connect your MetaMask wallet to start uploading music and registering IP assets</p>
-              <button
-                onClick={connectWallet}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
+    <div className="min-h-screen">
+      <Navigation />
+      
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 dark:from-blue-900/20 dark:to-purple-900/20" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+              Next Generation Music IP Platform
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+              Upload, discover, and monetize your music with AI-powered features and blockchain technology
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {!connected ? (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={connectWallet}
+                  className="btn-primary text-lg px-8 py-3"
+                >
+                  🦊 Connect Wallet to Start
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => window.location.href = '/upload'}
+                  className="btn-primary text-lg px-8 py-3"
+                >
+                  🎵 Upload Your Music
+                </motion.button>
+              )}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.location.href = '/explore'}
+                className="btn-secondary text-lg px-8 py-3"
               >
-                🦊 Connect MetaMask
-              </button>
+                🔍 Explore Music
+              </motion.button>
             </div>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg">
-                ✅ Connected
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Address:</strong> {account.slice(0, 6)}...{account.slice(-4)}
-              </div>
-            </div>
-          )}
+          </motion.div>
         </div>
+      </section>
 
-        {/* Upload Form */}
-        {connected && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">🎵 Upload Music & Register IP</h2>
+      {/* Featured Music Section */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h2 className="text-3xl font-bold text-center mb-12">
+              Featured Music
+            </h2>
 
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter music title"
-                  />
-                </div>
+            {musicNFTs.length === 0 ? (
+              <p className="text-center text-gray-500 dark:text-gray-400 py-8">
+                No music IP assets registered yet. Be the first to upload!
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {musicNFTs.map((nft) => (
+                  <motion.div
+                    key={nft.id}
+                    whileHover={{ y: -5 }}
+                    className="card group cursor-pointer"
+                    onClick={() => setSelectedTrack(nft)}
+                  >
+                    <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
+                      <img
+                        src={nft.imageUrl}
+                        alt={nft.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Artist *</label>
-                  <input
-                    type="text"
-                    value={artist}
-                    onChange={(e) => setArtist(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter artist name"
-                  />
-                </div>
-              </div>
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-1">
+                      {nft.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                      by {nft.artist}
+                    </p>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter music description"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price (IP tokens)</label>
-                <input
-                  type="number"
-                  step="0.001"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0.0"
-                />
-                <p className="text-xs text-gray-500 mt-1">Price in native IP tokens</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Audio File *</label>
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
-              >
-                {loading ? '⏳ Uploading & Registering IP...' : '🚀 Upload & Register IP on Story'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Music NFTs Gallery */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">🎨 Music IP Gallery</h2>
-
-          {musicNFTs.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No music IP assets registered yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {musicNFTs.map((nft) => (
-                <div key={nft.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition duration-200">
-                  {nft.imageUrl && (
-                    <img 
-                      src={nft.imageUrl.startsWith('http') ? nft.imageUrl : `https://ipfs.io/ipfs/${nft.imageUrl}`} 
-                      alt={nft.title}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                      onError={(e) => {
-                        console.log('Image load error, trying alternative:', nft.imageUrl)
-                        const target = e.target as HTMLImageElement
-                        if (!target.src.includes('placeholder')) {
-                          target.src = 'https://via.placeholder.com/400x400?text=Music+NFT'
-                        }
-                      }}
-                    />
-                  )}
-
-                  <h3 className="font-semibold text-lg mb-2">{nft.title}</h3>
-                  <p className="text-gray-600 mb-2">by {nft.artist}</p>
-
-                  {nft.description && (
-                    <p className="text-gray-500 text-sm mb-3">{nft.description}</p>
-                  )}
-
-                  {nft.price && nft.price !== '0' && (
-                    <p className="text-blue-600 font-medium mb-3">{nft.price} IP</p>
-                  )}
-
-                  <audio controls className="w-full mb-3">
-                    <source src={nft.audioUrl.startsWith('http') ? nft.audioUrl : `https://ipfs.io/ipfs/${nft.audioUrl}`} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-
-                  <div className="text-xs text-gray-400">
-                    <p>Owner: {nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}</p>
-                    <p>Created: {new Date(nft.createdAt).toLocaleDateString()}</p>
-                    {nft.ipId && (
-                      <p className="text-green-600">IP ID: {nft.ipId.slice(0, 10)}...</p>
+                    {nft.description && (
+                      <p className="text-gray-500 dark:text-gray-500 text-sm mb-3 line-clamp-2">
+                        {nft.description}
+                      </p>
                     )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
+                    {nft.price && nft.price !== '0' && (
+                      <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
+                        {nft.price} IP
+                      </p>
+                    )}
+
+                    <div className="text-xs text-gray-400 dark:text-gray-500">
+                      <p>Owner: {nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}</p>
+                      <p>Created: {new Date(nft.createdAt).toLocaleDateString()}</p>
+                      {nft.ipId && (
+                        <a
+                          href={`https://aeneid.explorer.story.foundation/ipa/${nft.ipId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-2 inline-block"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View on Story Protocol Explorer ↗
+                        </a>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
         </div>
-      </div>
+      </section>
+
+      {/* Music Player Modal */}
+      {selectedTrack && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedTrack(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6"
+            onClick={e => e.stopPropagation()}
+          >
+            <MusicPlayer
+              audioUrl={selectedTrack.audioUrl}
+              title={selectedTrack.title}
+              artist={selectedTrack.artist}
+              imageUrl={selectedTrack.imageUrl}
+            />
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Message Toast */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg ${
+            messageType === 'success' 
+              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' 
+              : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'
+          }`}
+        >
+          {message}
+        </motion.div>
+      )}
     </div>
   )
 }

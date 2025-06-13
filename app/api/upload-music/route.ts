@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFileToIPFS, uploadJSONToIPFS } from '../../../utils/functions/uploadToIpfs'
 import { createHash } from 'crypto'
@@ -63,6 +62,13 @@ export async function POST(request: NextRequest) {
     const description = formData.get('description') as string || ''
     const price = formData.get('price') as string || '0'
     const owner = formData.get('owner') as string
+    // Ensure owner address is properly formatted as hex
+    if (!owner.startsWith('0x')) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid owner address format' 
+      }, { status: 400 })
+    }
     const audioFile = formData.get('audioFile') as File
     const imageFile = formData.get('imageFile') as File | null
 
@@ -111,7 +117,7 @@ export async function POST(request: NextRequest) {
       creators: [
         {
           name: artist,
-          address: owner,
+          address: owner as `0x${string}`, // Type assertion to ensure proper hex format
           contributionPercent: 100,
         },
       ],

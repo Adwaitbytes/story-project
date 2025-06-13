@@ -16,7 +16,9 @@
     "skipLibCheck": true,
     "strict": true,
     "lib": [
-      "ESNext"
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
     "resolveJsonModule": true,
     "module": "CommonJS",
