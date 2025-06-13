@@ -1,7 +1,7 @@
 {
-  "/api/upload-music/route": "app/api/upload-music/route.js",
   "/api/get-music/route": "app/api/get-music/route.js",
-  "/upload/page": "app/upload/page.js",
+  "/api/upload-music/route": "app/api/upload-music/route.js",
+  "/page": "app/page.js",
   "/explore/page": "app/explore/page.js",
-  "/page": "app/page.js"
+  "/upload/page": "app/upload/page.js"
 }

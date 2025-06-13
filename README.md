@@ -1,3 +1,35 @@
+# Melodex - Music NFT Platform
+
+## Environment Setup
+
+Before deploying, make sure to set up the following environment variables in your Vercel project:
+
+1. `PERPLEXITY_API_KEY`: Your Perplexity API key (required for AI features)
+2. `WALLET_PRIVATE_KEY`: Your wallet private key for Story Protocol integration
+3. `PINATA_JWT`: Your Pinata JWT for IPFS uploads
+
+You can set these in your Vercel project settings under "Environment Variables".
+
+## Development
+
+1. Clone the repository
+2. Copy `.env.example` to `.env.local` and fill in your environment variables
+3. Install dependencies:
+
+    ```
+    npm install
+    ```
+
+4. Run the development server:
+
+    ```
+    npm run dev
+    ```
+
+## Deployment
+
+The project is configured for deployment on Vercel. Make sure all environment variables are set in your Vercel project settings before deploying.
+
 # Story TypeScript SDK Examples
 
 ## Get Started

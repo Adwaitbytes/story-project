@@ -11,15 +11,22 @@ if (!OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set')
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { type, prompt } = await request.json()
+export async function POST(req: Request) {
+  if (!PERPLEXITY_API_KEY) {
+    return NextResponse.json(
+      { error: 'Perplexity API is not configured. Please add PERPLEXITY_API_KEY to your environment variables.' },
+      { status: 501 }
+    )
+  }
 
-    if (!prompt) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Prompt is required' 
-      }, { status: 400 })
+  try {
+    const { prompt, type } = await req.json()
+
+    if (!prompt || !type) {
+      return NextResponse.json(
+        { error: 'Missing required parameters: prompt and type' },
+        { status: 400 }
+      )
     }
 
     // For image generation, we'll use OpenAI's DALL-E 3
@@ -97,10 +104,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Error in Perplexity API route:', error)
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'An unexpected error occurred'
-    }, { status: 500 })
+    console.error('Error in Perplexity API:', error)
+    return NextResponse.json(
+      { error: 'Failed to process request' },
+      { status: 500 }
+    )
   }
 } 
