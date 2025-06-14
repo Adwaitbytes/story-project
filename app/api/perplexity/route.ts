@@ -90,14 +90,15 @@ export async function POST(req: Request) {
           
           const result = await model.generateContent({
             contents: [{
+              role: "user",
               parts: [{
                 text: `Create a detailed album cover image based on this description: ${prompt}. The image should be high quality, artistic, and suitable for a music album. Focus on creating a visually striking composition that captures the mood and theme of the music.`
               }]
             }],
             generationConfig: {
               temperature: 0.9,
-              topK: 32,
-              topP: 1,
+              topK: 40,
+              topP: 0.95,
               maxOutputTokens: 2048,
             },
             safetySettings: [
@@ -121,6 +122,10 @@ export async function POST(req: Request) {
           });
 
           const response = await result.response;
+          if (!response.candidates || response.candidates.length === 0) {
+            throw new Error('No response from Gemini API');
+          }
+          
           const imageData = response.candidates[0]?.content?.parts[0]?.inlineData?.data;
           
           if (imageData) {
@@ -130,8 +135,12 @@ export async function POST(req: Request) {
               imageUrl: imageUrl
             });
           }
-        } catch (error) {
-          console.log('Gemini failed, trying next option...', error);
+        } catch (error: unknown) {
+          console.error('Detailed error in image generation:', error instanceof Error ? error.message : 'Unknown error');
+          if (error instanceof Error) {
+            throw new Error(`Image generation failed: ${error.message}`);
+          }
+          throw new Error('Image generation failed with unknown error');
         }
 
         // Try Stable Diffusion as last resort
@@ -178,12 +187,12 @@ export async function POST(req: Request) {
         // If we get here, all APIs failed
         throw new Error('All image generation APIs failed. Please try a different prompt or check API keys.');
         
-      } catch (error) {
-        console.error('Detailed error in image generation:', error);
-        return NextResponse.json(
-          { error: error.message || 'Failed to generate image' },
-          { status: 500 }
-        );
+      } catch (error: unknown) {
+        console.error('Detailed error in image generation:', error instanceof Error ? error.message : 'Unknown error');
+        if (error instanceof Error) {
+          throw new Error(`Image generation failed: ${error.message}`);
+        }
+        throw new Error('Image generation failed with unknown error');
       }
     }
 
