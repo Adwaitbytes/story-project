@@ -1,9 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  output: 'export',
   images: {
+    unoptimized: true,
     domains: ['ipfs.io', 'gateway.ipfs.io', 'cloudflare-ipfs.com', 'ipfs.infura.io'],
   },
+  transpilePackages: ['@rainbow-me/rainbowkit', 'viem'],
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    return config;
+  },
+  basePath: '/story-project',
+  assetPrefix: '/story-project/',
+  reactStrictMode: true,
   
   env: {
     WALLET_PRIVATE_KEY: process.env.WALLET_PRIVATE_KEY,
@@ -25,11 +34,6 @@ const nextConfig = {
     ]
   },
   // Exclude scripts directory from build
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    return config;
-  },
-  // Exclude scripts from build
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   experimental: {
     // This will exclude the scripts directory from the build

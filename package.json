@@ -1,13 +1,15 @@
 {
     "name": "story-music-dapp",
     "version": "1.0.0",
+    "private": true,
     "description": "Music NFT dApp using Story Protocol",
     "main": "index.js",
     "scripts": {
         "dev": "next dev -p 3000",
         "build": "next build",
-        "start": "next start -p 3000",
-        "lint": "next lint"
+        "start": "next start",
+        "lint": "next lint",
+        "export": "next build && next export"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
