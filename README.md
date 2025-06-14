@@ -152,8 +152,8 @@ cp .env.example .env
 # Fill in your API keys and configuration
 
 # Run development server
-npm run dev
-```
+    npm run dev
+    ```
 
 ### Environment Variables
 ```env
