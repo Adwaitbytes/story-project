@@ -4,7 +4,7 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAE9XvYg-cYkMeJbyLP2B05QXURAmMFKzU'
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIza****************yLP2B05QXURAmMFKzU'
 const STABILITY_API_KEY = process.env.STABILITY_API_KEY || 'sk-...' // You'll need to get this from stability.ai
 
 if (!PERPLEXITY_API_KEY) {

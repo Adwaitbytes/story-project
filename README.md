@@ -1,99 +1,181 @@
-# Melodex - Music NFT Platform
+# Story Music - Decentralized Music NFT Platform
 
-## Environment Setup
+## 🎵 Overview
+Story Music is a decentralized platform that revolutionizes music ownership and distribution using blockchain technology. Built on Story Protocol, it enables artists to mint their music as NFTs, manage their intellectual property rights, and connect directly with their audience.
 
-Before deploying, make sure to set up the following environment variables in your Vercel project:
+## 🚀 Key Features
 
-1. `PERPLEXITY_API_KEY`: Your Perplexity API key (required for AI features)
-2. `WALLET_PRIVATE_KEY`: Your wallet private key for Story Protocol integration
-3. `PINATA_JWT`: Your Pinata JWT for IPFS uploads
+### 1. Music NFT Creation & Management
+- **Easy Upload**: Upload music files and artwork directly to IPFS
+- **Smart Metadata**: Automatic metadata generation for music and NFT assets
+- **IP Registration**: Seamless registration of music as IP assets on Story Protocol
+- **Royalty Management**: Built-in royalty tracking and distribution system
 
-You can set these in your Vercel project settings under "Environment Variables".
+### 2. AI-Powered Features
+- **AI Album Art Generation**: Generate unique album artwork using multiple AI models
+- **Smart Descriptions**: AI-assisted metadata and description generation
+- **Content Moderation**: AI-powered content verification and moderation
 
-## Development
+### 3. User Experience
+- **Intuitive Interface**: Clean, modern UI for both artists and collectors
+- **Music Player**: Built-in player for previewing and playing music NFTs
+- **Wallet Integration**: Seamless Web3 wallet connection using RainbowKit
+- **Responsive Design**: Mobile-first approach for all devices
 
-1. Clone the repository
-2. Copy `.env.example` to `.env.local` and fill in your environment variables
-3. Install dependencies:
+### 4. Technical Innovation
+- **Decentralized Storage**: IPFS integration for immutable content storage
+- **Smart Contracts**: Custom contracts for IP management and licensing
+- **Multi-Chain Support**: Built on Story Protocol's infrastructure
+- **AI Integration**: Multiple AI models for content generation and moderation
 
-    ```
-    npm install
-    ```
+## 🛠️ Technical Stack
 
-4. Run the development server:
+### Frontend
+- **Framework**: Next.js 15.3.3
+- **Styling**: Tailwind CSS
+- **Web3 Integration**: RainbowKit, wagmi
+- **State Management**: React Context + Local Storage
+- **UI Components**: Custom components with Lucide icons
 
-    ```
-    npm run dev
-    ```
+### Backend
+- **API Routes**: Next.js API routes
+- **Storage**: IPFS (Infura)
+- **Blockchain**: Story Protocol
+- **AI Services**: 
+  - Stability AI (Image Generation)
+  - Google Gemini (Content Generation)
+  - Replicate (Stable Diffusion)
 
-## Deployment
+### Smart Contracts
+- **Protocol**: Story Protocol
+- **NFT Standard**: ERC-721
+- **IP Management**: Custom IP licensing contracts
 
-The project is configured for deployment on Vercel. Make sure all environment variables are set in your Vercel project settings before deploying.
+## 🔑 Key Technical Details
 
-# Story TypeScript SDK Examples
+### IPFS Integration
+```typescript
+// Example of IPFS upload
+const uploadToIPFS = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await fetch('https://ipfs.infura.io:5001/api/v0/add', {
+    method: 'POST',
+    body: formData
+  });
+  return response.json();
+};
+```
 
-## Get Started
+### Story Protocol Integration
+```typescript
+// Example of IP registration
+const registerIP = async (metadata: IPMetadata) => {
+  const response = await client.ip.register({
+    metadata: metadata,
+    licenseTerms: [defaultLicense],
+    txOptions: { waitForTransaction: true }
+  });
+  return response;
+};
+```
 
-1. Install the dependencies:
+### AI Image Generation
+```typescript
+// Multi-model approach for image generation
+const generateImage = async (prompt: string) => {
+  // Try multiple AI services in sequence
+  const services = [
+    stabilityAI,
+    geminiAI,
+    stableDiffusion
+  ];
+  
+  for (const service of services) {
+    try {
+      const image = await service.generate(prompt);
+      if (image) return image;
+    } catch (error) {
+      console.log(`Service failed: ${error}`);
+    }
+  }
+};
+```
 
-    ```
-    npm install
-    ```
+## 🎯 Hackathon Submission Details
 
-2. Rename the `.env.example` file to `.env`
+### Problem Statement
+The music industry faces significant challenges in:
+1. Fair compensation for artists
+2. Complex licensing and rights management
+3. Limited direct artist-fan connections
+4. High barriers to entry for independent artists
 
-3. Add your Story Network Testnet wallet's private key to `.env` file:
+### Solution
+Story Music addresses these challenges by:
+1. **Decentralized Ownership**: Music NFTs provide verifiable ownership and rights
+2. **Smart Licensing**: Automated licensing through Story Protocol
+3. **Direct Distribution**: Artists can sell directly to fans
+4. **AI Assistance**: Lowering barriers to entry with AI tools
 
-    ```
-    WALLET_PRIVATE_KEY=<your_wallet_private_key>
-    ```
+### Innovation Points
+1. **Multi-Model AI Integration**: Robust image generation using multiple AI services
+2. **IPFS + Story Protocol**: Secure, decentralized storage with proper IP management
+3. **User-Friendly Interface**: Complex blockchain operations made simple
+4. **Scalable Architecture**: Built for future expansion and feature addition
 
-4. [REQUIRED FOR `register` and `register-custom` SCRIPTS] Go to [Pinata](https://pinata.cloud/) and create a new API key. Add the JWT to your `.env` file:
+### Future Roadmap
+1. **Social Features**: Artist-fan interaction and community building
+2. **Advanced Licensing**: More flexible licensing options
+3. **Analytics Dashboard**: Detailed insights for artists
+4. **Mobile App**: Native mobile experience
+5. **Cross-Chain Support**: Additional blockchain networks
 
-    ```
-    PINATA_JWT=<your_pinata_jwt>
-    ```
+## 🚀 Getting Started
 
-5. [OPTIONAL] We have already configured a public SPG NFT collection for you (`0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc`). If you want to create your own collection for your IPs, create a new SPG NFT collection by running `npm run create-spg-collection` in your terminal.
+### Prerequisites
+- Node.js 18+
+- MetaMask or other Web3 wallet
+- IPFS node (Infura account)
+- API keys for AI services
 
-    3a. Look at the console output, and copy the NFT contract address. Add that value as `SPG_NFT_CONTRACT_ADDRESS` to your `.env` file:
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/story-music.git
 
-    ```
-    SPG_NFT_CONTRACT_ADDRESS=<your_spg_nft_contract_address>
-    ```
+# Install dependencies
+npm install
 
-    **NOTE: You will only have to do this one time. Once you create an SPG collection, you can run this script as many times as you'd like.**
+# Set up environment variables
+cp .env.example .env
+# Fill in your API keys and configuration
 
-## Available Scripts
+# Run development server
+npm run dev
+```
 
-Below are all of the available scripts to help you build on Story.
+### Environment Variables
+```env
+# Required
+NEXT_PUBLIC_INFURA_IPFS_PROJECT_ID=your_infura_project_id
+NEXT_PUBLIC_INFURA_IPFS_PROJECT_SECRET=your_infura_project_secret
+STORY_PROTOCOL_API_KEY=your_story_protocol_key
 
-### Registration
+# AI Services (at least one required)
+STABILITY_API_KEY=your_stability_key
+GEMINI_API_KEY=your_gemini_key
+REPLICATE_API_KEY=your_replicate_key
+```
 
--   `register`: This mints an NFT and registers it in the same transaction, using a public SPG collection.
--   `register-custom`: This mints an NFT using a custom ERC-721 contract and then registers it in a separate transaction.
+## 🤝 Contributing
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-### Licenses
+## 📝 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
--   `mint-license`: Mints a license token from an IP Asset.
--   `limit-license`: Registers a new IP and attaches license terms that only allow you to mint 1 license token. This is an example for limiting the amount of licenses you can mint.
-
-### Royalty
-
--   `pay-revenue`: This is an example of registering a derivative, paying the derivative, and then allowing derivative and parent to claim their revenues.
--   `license-revenue`: This is an example of registering a derivative, minting a paid license from the derivative, and then allowing derivative and parent to claim their revenues.
--   `transfer-royalty-tokens`: This shows you how to transfer Royalty Tokens from an IP Account to any external wallet. Royalty Tokens are used to claim a % of revenue from an IP Asset.
-
-### Derivative
-
--   `derivative-commercial`: This mints an NFT and registers it as a derivative of an IP Asset in the same transaction, using a public SPG collection. It costs 1 $WIP to register as derivative and also includes an example of the parent claiming its revenue.
--   `derivative-non-commercial`: This mints an NFT and registesr it as a derivative of an IP Asset in the same transaction, using a public SPG collection. It's free to register as derivative.
--   `derivative-commercial-custom`: This mints an NFT using a custom ERC-721 contract and then registers it as a derivative of an IP Asset in a separate transaction. It costs 1 $WIP to register as derivative and also includes an example of the parent claiming its revenue.
-
-### Dispute
-
--   `dispute`: This disputes an IP Asset.
-
-### Misc
-
--   `send-raw-transaction`: An example of sending a transaction using viem's `encodeFunctionData`.
+## 🙏 Acknowledgments
+- Story Protocol for the IP management infrastructure
+- IPFS for decentralized storage
+- All AI service providers
+- The Web3 community for inspiration and support
