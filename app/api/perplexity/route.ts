@@ -15,6 +15,10 @@ if (!OPENAI_API_KEY && !REPLICATE_API_KEY && !GEMINI_API_KEY) {
   throw new Error('No image generation API keys are set')
 }
 
+if (!STABILITY_API_KEY) {
+  console.warn('STABILITY_API_KEY is not set - image generation may not work')
+}
+
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 
@@ -36,51 +40,60 @@ export async function POST(req: Request) {
       )
     }
 
-    // For image generation, we'll use OpenAI's DALL-E 3
+    // For image generation, we'll use Stability AI first
     if (type === 'image_generation') {
       console.log('Attempting to generate image with prompt:', prompt);
       
       try {
-        // Try Stability AI first (free tier available)
-        try {
-          console.log('Trying Stability AI...');
-          const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${STABILITY_API_KEY}`,
-            },
-            body: JSON.stringify({
-              text_prompts: [
-                {
-                  text: prompt,
-                  weight: 1
-                }
-              ],
-              cfg_scale: 7,
-              height: 1024,
-              width: 1024,
-              samples: 1,
-              steps: 30,
-              style_preset: "digital-art"
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`Stability API error: ${response.statusText}`);
-          }
-
-          const result = await response.json();
-          if (result.artifacts?.[0]?.base64) {
-            const imageUrl = `data:image/png;base64,${result.artifacts[0].base64}`;
-            return NextResponse.json({
-              success: true,
-              imageUrl: imageUrl
+        // Try Stability AI first
+        if (STABILITY_API_KEY) {
+          try {
+            console.log('Trying Stability AI...');
+            const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${STABILITY_API_KEY}`,
+              },
+              body: JSON.stringify({
+                text_prompts: [
+                  {
+                    text: prompt,
+                    weight: 1
+                  }
+                ],
+                cfg_scale: 7,
+                height: 1024,
+                width: 1024,
+                samples: 1,
+                steps: 30,
+                style_preset: "digital-art"
+              }),
             });
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              console.error('Stability API error details:', errorData);
+              throw new Error(`Stability API error: ${response.statusText}${errorData ? ` - ${JSON.stringify(errorData)}` : ''}`);
+            }
+
+            const result = await response.json();
+            if (result.artifacts?.[0]?.base64) {
+              const imageUrl = `data:image/png;base64,${result.artifacts[0].base64}`;
+              return NextResponse.json({
+                success: true,
+                imageUrl: imageUrl
+              });
+            } else {
+              throw new Error('No image data in Stability AI response');
+            }
+          } catch (error) {
+            console.error('Stability AI error:', error);
+            // Don't throw here, try other options
           }
-        } catch (error) {
-          console.log('Stability AI failed, trying next option...', error);
+        } else {
+          console.log('Skipping Stability AI - API key not configured');
         }
 
         // Try Gemini with the correct model

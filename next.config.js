@@ -11,6 +11,7 @@ const nextConfig = {
     STORY_NETWORK: process.env.STORY_NETWORK,
     RPC_PROVIDER_URL: process.env.RPC_PROVIDER_URL,
     SPG_NFT_CONTRACT_ADDRESS: process.env.SPG_NFT_CONTRACT_ADDRESS,
+    STABILITY_API_KEY: process.env.STABILITY_API_KEY,
   },
   async headers() {
     return [

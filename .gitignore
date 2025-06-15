@@ -25,7 +25,6 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
-music-storage.json
 music-storage-previous.json
 
 # vercel
