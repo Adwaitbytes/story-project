@@ -1,7 +1,7 @@
-# Story Music - Decentralized Music NFT Platform
+# Melodex - Decentralized Music NFT Platform
 
 ## 🎵 Overview
-Story Music is a decentralized platform that revolutionizes music ownership and distribution using blockchain technology. Built on Story Protocol, it enables artists to mint their music as NFTs, manage their intellectual property rights, and connect directly with their audience.
+Melodex is a decentralized platform that revolutionizes music ownership and distribution using blockchain technology. Built on Story Protocol, it enables artists to mint their music as NFTs, manage their intellectual property rights, and connect directly with their audience.
 
 ## 🚀 Key Features
 
@@ -112,7 +112,7 @@ The music industry faces significant challenges in:
 4. High barriers to entry for independent artists
 
 ### Solution
-Story Music addresses these challenges by:
+Melodex addresses these challenges by:
 1. **Decentralized Ownership**: Music NFTs provide verifiable ownership and rights
 2. **Smart Licensing**: Automated licensing through Story Protocol
 3. **Direct Distribution**: Artists can sell directly to fans
@@ -142,7 +142,7 @@ Story Music addresses these challenges by:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/story-music.git
+git clone with the repository link
 
 # Install dependencies
 npm install
@@ -152,8 +152,8 @@ cp .env.example .env
 # Fill in your API keys and configuration
 
 # Run development server
-    npm run dev
-    ```
+npm run dev
+```
 
 ### Environment Variables
 ```env
