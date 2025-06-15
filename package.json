@@ -1,13 +1,12 @@
 {
     "name": "story-music-dapp",
     "version": "1.0.0",
-    "private": true,
     "description": "Music NFT dApp using Story Protocol",
     "main": "index.js",
     "scripts": {
         "dev": "next dev -p 3000",
         "build": "next build",
-        "start": "next start",
+        "start": "next start -p 3000",
         "lint": "next lint"
     },
     "dependencies": {
@@ -27,9 +26,9 @@
         "ipfs-http-client": "^60.0.1",
         "lucide-react": "^0.515.0",
         "multiformats": "^9.9.0",
-        "next": "^15.3.3",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
+        "next": "^14.2.30",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
         "tailwind-merge": "^2.6.0"
     },
     "devDependencies": {

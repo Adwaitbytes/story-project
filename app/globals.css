@@ -53,6 +53,15 @@
            focus:ring-2 focus:ring-blue-500 focus:border-blue-500
            transition-all duration-200 ease-in-out;
   }
+
+  .hover-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hover-card:hover {
+    /* Add your hover styles here */
+  }
 }
 
 @layer utilities {
