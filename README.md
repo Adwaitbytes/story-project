@@ -142,7 +142,11 @@ Melodex addresses these challenges by:
 ### Installation
 ```bash
 # Clone the repository
+<<<<<<< HEAD
 git clone https://github.com/yourusername/melodex.git
+=======
+git clone with the repository link
+>>>>>>> 5d72c6d0281f536af5f2422748a843532d2ea606
 
 # Install dependencies
 npm install
