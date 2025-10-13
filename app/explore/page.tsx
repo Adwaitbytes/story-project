@@ -25,14 +25,15 @@ export default function ExplorePage() {
   const [selectedTrack, setSelectedTrack] = useState<MusicNFT | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchMusic = async () => {
+    setLoading(true)
+    const res = await fetch('/api/get-music')
+    const data = await res.json()
+    if (data.success) setMusicNFTs(data.music)
+    setLoading(false)
+  }
+
   useEffect(() => {
-    const fetchMusic = async () => {
-      setLoading(true)
-      const res = await fetch('/api/get-music')
-      const data = await res.json()
-      if (data.success) setMusicNFTs(data.music)
-      setLoading(false)
-    }
     fetchMusic()
   }, [])
 

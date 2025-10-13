@@ -31,10 +31,10 @@ async function blobRead(): Promise<MusicData[] | null> {
   if (!usingBlob()) return null
   
   try {
-    // List all blobs with our prefix and get the latest one
+    // List all blobs with music prefix (will match both music-data and music-storage)
     const { blobs } = await list({ 
       token: BLOB_TOKEN,
-      prefix: 'music-data',
+      prefix: 'music',
     })
     
     if (blobs.length === 0) {

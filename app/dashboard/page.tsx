@@ -29,6 +29,7 @@ export default function DashboardPage() {
     recentUploads: []
   })
   const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   useEffect(() => {
     const checkWallet = async () => {
@@ -108,6 +109,32 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Error connecting wallet:', error)
+    }
+  }
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/delete-music?id=${id}&owner=${account}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`✅ Successfully deleted "${title}"`)
+        // Refresh the stats
+        loadUserStats(account)
+      } else {
+        alert(`❌ Failed to delete: ${data.error}`)
+      }
+    } catch (error) {
+      alert(`❌ Error deleting music: ${error}`)
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -255,15 +282,22 @@ export default function DashboardPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {upload.views}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                               <a
                                 href={`https://aeneid.explorer.story.foundation/ipa/${upload.ipId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-block"
                               >
-                                View on Explorer ↗
+                                View ↗
                               </a>
+                              <button
+                                onClick={() => handleDelete(upload.id, upload.title)}
+                                disabled={deleting === upload.id}
+                                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:text-gray-400 inline-block"
+                              >
+                                {deleting === upload.id ? 'Deleting...' : 'Delete'}
+                              </button>
                             </td>
                           </tr>
                         ))}
