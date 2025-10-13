@@ -1,49 +1,23 @@
-
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { readMusicData } from '../../../utils/storage'
+import { headers } from 'next/headers'
 
-interface MusicData {
-  id: string
-  title: string
-  artist: string
-  description: string
-  price: string
-  audioUrl: string
-  imageUrl: string
-  owner: string
-  metadataUrl: string
-  createdAt: string
-  ipId?: string
-  txHash?: string
-}
-
-const STORAGE_FILE = path.join(process.cwd(), 'music-storage.json')
-
-function readStorage(): MusicData[] {
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const data = fs.readFileSync(STORAGE_FILE, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
-  } catch (error) {
-    console.error('❌ Error reading storage:', error)
-    return []
-  }
-}
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 export async function GET() {
   console.log('📂 Loading music NFTs from storage...')
   
   try {
-    const musicData = readStorage()
+    // Hint to Next/Vercel that this is dynamic
+    headers()
+    const musicData = await readMusicData()
     console.log('✅ Loaded', musicData.length, 'music NFTs')
     
     return NextResponse.json({
       success: true,
       music: musicData,
-    })
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('💥 Error loading music:', error)
     
@@ -51,6 +25,6 @@ export async function GET() {
       success: false,
       error: 'Failed to load music',
       music: [],
-    }, { status: 500 })
+    }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
   }
 }

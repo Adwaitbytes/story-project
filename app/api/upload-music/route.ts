@@ -1,58 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFileToIPFS, uploadJSONToIPFS } from '../../../utils/functions/uploadToIpfs'
 import { createHash } from 'crypto'
-import fs from 'fs'
-import path from 'path'
+import { writeMusicData, readMusicData, type MusicData } from '../../../utils/storage'
+import { headers } from 'next/headers'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 import { client, networkInfo } from '../../../utils/config'
 import { createCommercialRemixTerms, SPGNFTContractAddress } from '../../../utils/utils'
 import { IpMetadata } from '@story-protocol/core-sdk'
-
-// Define interface for music data
-interface MusicData {
-  id: string
-  title: string
-  artist: string
-  description: string
-  price: string
-  audioUrl: string
-  imageUrl: string
-  owner: string
-  metadataUrl: string
-  createdAt: string
-  ipId?: string
-  txHash?: string
-}
-
-const STORAGE_FILE = path.join(process.cwd(), 'music-storage.json')
-
-// Helper function to read storage
-function readStorage(): MusicData[] {
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const data = fs.readFileSync(STORAGE_FILE, 'utf8')
-      return JSON.parse(data)
-    }
-    return []
-  } catch (error) {
-    console.error('❌ Error reading storage:', error)
-    return []
-  }
-}
-
-// Helper function to write storage
-function writeStorage(data: MusicData[]): void {
-  try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2))
-    console.log('✅ Storage updated successfully')
-  } catch (error) {
-    console.error('❌ Error writing storage:', error)
-  }
-}
 
 export async function POST(request: NextRequest) {
   console.log('🚀 Starting music upload and IP registration process...')
   
   try {
+    // Mark route as dynamic
+    headers()
     // Parse form data
     console.log('📦 Step 1: Parsing form data...')
     const formData = await request.formData()
@@ -223,9 +186,9 @@ export async function POST(request: NextRequest) {
       txHash: response.txHash,
     }
 
-    const existingData = readStorage()
+  const existingData = await readMusicData()
     existingData.push(musicData)
-    writeStorage(existingData)
+  await writeMusicData(existingData)
     console.log('✅ Data saved to local storage')
 
     // Step 9: Return success response
@@ -240,7 +203,7 @@ export async function POST(request: NextRequest) {
       audioUrl,
       imageUrl,
       metadataUrl: `https://ipfs.io/ipfs/${nftIpfsHash}`,
-    })
+    }, { headers: { 'Cache-Control': 'no-store' } })
 
   } catch (error) {
     console.error('💥 Error in upload process:', error)
@@ -254,6 +217,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Upload failed',
-    }, { status: 500 })
+    }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
   }
 }
