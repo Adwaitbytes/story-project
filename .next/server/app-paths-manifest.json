@@ -1,7 +1,5 @@
 {
-  "/upload/page": "app/upload/page.js",
-  "/api/upload-music/route": "app/api/upload-music/route.js",
-  "/explore/page": "app/explore/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/get-music/route": "app/api/get-music/route.js",
   "/page": "app/page.js"
 }
