@@ -1,6 +1,4 @@
 {
   "/api/get-music/route": "app/api/get-music/route.js",
-  "/ai/page": "app/ai/page.js",
-  "/api/perplexity/route": "app/api/perplexity/route.js",
   "/page": "app/page.js"
 }

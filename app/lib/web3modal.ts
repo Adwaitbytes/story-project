@@ -3,22 +3,22 @@ import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// Define Story Network Odyssey Testnet
-const storyOdyssey = {
-  id: 1516,
-  name: 'Story Network Odyssey Testnet',
-  network: 'story-odyssey',
+// Define Story Network Aeneid Testnet (from screenshot: Chain ID 1315)
+const storyAeneid = {
+  id: 1315,
+  name: 'Story Aeneid Testnet',
+  network: 'story-aeneid',
   nativeCurrency: {
     decimals: 18,
     name: 'IP',
     symbol: 'IP',
   },
   rpcUrls: {
-    default: { http: ['https://odyssey.storyrpc.io'] },
-    public: { http: ['https://odyssey.storyrpc.io'] },
+    default: { http: ['https://aeneid.storyrpc.io'] },
+    public: { http: ['https://aeneid.storyrpc.io'] },
   },
   blockExplorers: {
-    default: { name: 'Explorer', url: 'https://odyssey.storyscan.xyz' },
+    default: { name: 'Explorer', url: 'https://aeneid.storyscan.xyz' },
   },
   testnet: true,
 }
@@ -35,7 +35,7 @@ const metadata = {
 }
 
 // Create wagmiConfig
-const chains = [storyOdyssey] as const
+const chains = [storyAeneid] as const
 const config = defaultWagmiConfig({
   chains,
   projectId,
