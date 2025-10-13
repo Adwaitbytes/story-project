@@ -1,23 +1,24 @@
 import { NextResponse } from 'next/server'
 import { readMusicData } from '../../../utils/storage'
-import { headers } from 'next/headers'
 
+// Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 
 export async function GET() {
   console.log('📂 Loading music NFTs from storage...')
   
   try {
-    // Hint to Next/Vercel that this is dynamic
-    headers()
     const musicData = await readMusicData()
     console.log('✅ Loaded', musicData.length, 'music NFTs')
     
     return NextResponse.json({
       success: true,
       music: musicData,
-    }, { headers: { 'Cache-Control': 'no-store' } })
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    })
   } catch (error) {
     console.error('💥 Error loading music:', error)
     
@@ -25,6 +26,6 @@ export async function GET() {
       success: false,
       error: 'Failed to load music',
       music: [],
-    }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
+    }, { status: 500 })
   }
 }

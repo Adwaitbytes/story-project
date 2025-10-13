@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFileToIPFS, uploadJSONToIPFS } from '../../../utils/functions/uploadToIpfs'
 import { createHash } from 'crypto'
-import { writeMusicData, readMusicData, type MusicData } from '../../../utils/storage'
-import { headers } from 'next/headers'
-
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
 import { client, networkInfo } from '../../../utils/config'
 import { createCommercialRemixTerms, SPGNFTContractAddress } from '../../../utils/utils'
 import { IpMetadata } from '@story-protocol/core-sdk'
+import { readMusicData, writeMusicData, type MusicData } from '../../../utils/storage'
+
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 Starting music upload and IP registration process...')
   
   try {
-    // Mark route as dynamic
-    headers()
     // Parse form data
     console.log('📦 Step 1: Parsing form data...')
     const formData = await request.formData()
@@ -186,10 +183,10 @@ export async function POST(request: NextRequest) {
       txHash: response.txHash,
     }
 
-  const existingData = await readMusicData()
+    const existingData = await readMusicData()
     existingData.push(musicData)
-  await writeMusicData(existingData)
-    console.log('✅ Data saved to local storage')
+    await writeMusicData(existingData)
+    console.log('✅ Data saved to storage')
 
     // Step 9: Return success response
     console.log('🚀 Process completed successfully!')
@@ -203,7 +200,11 @@ export async function POST(request: NextRequest) {
       audioUrl,
       imageUrl,
       metadataUrl: `https://ipfs.io/ipfs/${nftIpfsHash}`,
-    }, { headers: { 'Cache-Control': 'no-store' } })
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
+    })
 
   } catch (error) {
     console.error('💥 Error in upload process:', error)
@@ -217,6 +218,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Upload failed',
-    }, { status: 500, headers: { 'Cache-Control': 'no-store' } })
+    }, { status: 500 })
   }
 }

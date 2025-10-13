@@ -1,4 +1,5 @@
-// Storage utility: uses Vercel KV if configured, falls back to local file in dev
+// Storage utility: uses Vercel Blob in production, falls back to local file in dev
+import { put, del, list } from '@vercel/blob'
 import fs from 'fs'
 import path from 'path'
 
@@ -18,78 +19,136 @@ export interface MusicData {
 }
 
 const STORAGE_FILE = path.join(process.cwd(), 'music-storage.json')
-const KV_URL = process.env.KV_REST_API_URL
-const KV_TOKEN = process.env.KV_REST_API_TOKEN
-const KV_KEY = process.env.KV_MUSIC_KEY || 'music:storage'
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN
+const BLOB_FILENAME = 'music-data.json' // Use different name to avoid conflicts
 
-function usingKV() {
-  return Boolean(KV_URL && KV_TOKEN)
+function usingBlob(): boolean {
+  return Boolean(BLOB_TOKEN)
 }
 
-async function kvGet<T = unknown>(key: string): Promise<T | null> {
-  if (!usingKV()) return null
-  const url = `${KV_URL!.replace(/\/$/, '')}/get/${encodeURIComponent(key)}`
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    cache: 'no-store',
-  })
-  if (!res.ok) return null
-  const body = (await res.json()) as { result?: string | null }
-  if (!body || body.result == null) return null
+// Read from Vercel Blob
+async function blobRead(): Promise<MusicData[] | null> {
+  if (!usingBlob()) return null
+  
   try {
-    return JSON.parse(body.result) as T
-  } catch {
-    // if plain string stored
-    return (body.result as unknown) as T
+    // List all blobs with our prefix and get the latest one
+    const { blobs } = await list({ 
+      token: BLOB_TOKEN,
+      prefix: 'music-data',
+    })
+    
+    if (blobs.length === 0) {
+      console.log('📝 No existing blob storage found, will create on first write')
+      return []
+    }
+    
+    // Sort by uploaded date and get the most recent
+    const latestBlob = blobs.sort((a, b) => 
+      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    )[0]
+    
+    console.log('� Reading from latest blob:', latestBlob.url)
+    
+    const response = await fetch(latestBlob.url, {
+      cache: 'no-store',
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Blob fetch failed: ${response.status} ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    console.log('✅ Loaded data from Vercel Blob:', data.length, 'tracks')
+    return data as MusicData[]
+  } catch (error) {
+    console.error('❌ Error reading from Blob:', error)
+    return []
   }
 }
 
-async function kvSet<T = unknown>(key: string, value: T): Promise<void> {
-  if (!usingKV()) return
-  const val = encodeURIComponent(JSON.stringify(value))
-  const url = `${KV_URL!.replace(/\/$/, '')}/set/${encodeURIComponent(key)}/${val}`
-  await fetch(url, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
-    cache: 'no-store',
-  })
+// Write to Vercel Blob
+async function blobWrite(data: MusicData[]): Promise<void> {
+  if (!usingBlob()) return
+  
+  try {
+    // List and delete old blobs with the same prefix
+    try {
+      const { blobs } = await list({ 
+        token: BLOB_TOKEN,
+        prefix: 'music-data',
+      })
+      
+      if (blobs.length > 0) {
+        console.log(`🗑️ Deleting ${blobs.length} old blob(s)...`)
+        await Promise.all(
+          blobs.map(blob => del(blob.url, { token: BLOB_TOKEN }))
+        )
+        // Small delay to ensure deletion propagates
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+    } catch (delError) {
+      console.log('ℹ️ No existing blob to delete or delete failed:', delError)
+    }
+    
+    // Write new blob with timestamp to ensure uniqueness, then we'll use the latest
+    const timestamp = Date.now()
+    const filename = `music-data-${timestamp}.json`
+    
+    const blob = await put(filename, JSON.stringify(data, null, 2), {
+      access: 'public',
+      token: BLOB_TOKEN,
+      contentType: 'application/json',
+    })
+    console.log('✅ Data saved to Vercel Blob:', blob.url)
+  } catch (error) {
+    console.error('❌ Error writing to Blob:', error)
+    throw error
+  }
 }
 
-function fsRead<T = unknown>(fallback: T): T {
+// Read from local filesystem
+function fsRead(): MusicData[] {
   try {
     if (fs.existsSync(STORAGE_FILE)) {
       const data = fs.readFileSync(STORAGE_FILE, 'utf8')
-      return JSON.parse(data) as T
+      return JSON.parse(data) as MusicData[]
     }
-    return fallback
-  } catch (e) {
-    console.error('❌ FS read error:', e)
-    return fallback
+    return []
+  } catch (error) {
+    console.error('❌ FS read error:', error)
+    return []
   }
 }
 
-function fsWrite<T = unknown>(value: T) {
+// Write to local filesystem
+function fsWrite(data: MusicData[]): void {
   try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(value, null, 2))
-  } catch (e) {
-    console.error('❌ FS write error:', e)
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2))
+    console.log('✅ Data saved to local file')
+  } catch (error) {
+    console.error('❌ FS write error:', error)
   }
 }
 
+// Public API: Read music data
 export async function readMusicData(): Promise<MusicData[]> {
-  // Try KV first in production
-  const fromKv = await kvGet<MusicData[]>(KV_KEY)
-  if (fromKv) return fromKv
-  // Fall back to FS locally
-  return fsRead<MusicData[]>([])
+  if (usingBlob()) {
+    console.log('📦 Using Vercel Blob storage')
+    const data = await blobRead()
+    return data || []
+  } else {
+    console.log('📁 Using local file storage')
+    return fsRead()
+  }
 }
 
+// Public API: Write music data
 export async function writeMusicData(data: MusicData[]): Promise<void> {
-  // Write to KV if available
-  if (usingKV()) {
-    await kvSet(KV_KEY, data)
-  }
-  // In local dev (no KV), keep JSON updated
-  if (!usingKV()) {
+  if (usingBlob()) {
+    console.log('📦 Saving to Vercel Blob storage')
+    await blobWrite(data)
+  } else {
+    console.log('📁 Saving to local file storage')
     fsWrite(data)
   }
 }
