@@ -4,23 +4,18 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIza****************yLP2B05QXURAmMFKzU'
-const STABILITY_API_KEY = process.env.STABILITY_API_KEY || 'sk-...' // You'll need to get this from stability.ai
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
+const STABILITY_API_KEY = process.env.STABILITY_API_KEY
 
 if (!PERPLEXITY_API_KEY) {
   throw new Error('PERPLEXITY_API_KEY is not set')
 }
 
-if (!OPENAI_API_KEY && !REPLICATE_API_KEY && !GEMINI_API_KEY) {
-  throw new Error('No image generation API keys are set')
+// Initialize Gemini only if key exists
+let genAI: GoogleGenerativeAI | null = null
+if (GEMINI_API_KEY) {
+  genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 }
-
-if (!STABILITY_API_KEY) {
-  console.warn('STABILITY_API_KEY is not set - image generation may not work')
-}
-
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
 
 export async function POST(req: Request) {
   if (!PERPLEXITY_API_KEY) {
@@ -44,11 +39,16 @@ export async function POST(req: Request) {
     if (type === 'image_generation') {
       console.log('Attempting to generate image with prompt:', prompt);
       
+      // Truncate prompt if too long (Stability AI has 2000 char limit)
+      const truncatedPrompt = prompt.length > 1800 
+        ? prompt.substring(0, 1800) + '...' 
+        : prompt;
+      
       try {
         // Try Stability AI first
         if (STABILITY_API_KEY) {
           try {
-            console.log('Trying Stability AI...');
+            console.log('Trying Stability AI with new key...');
             const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image', {
               method: 'POST',
               headers: {
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
               body: JSON.stringify({
                 text_prompts: [
                   {
-                    text: prompt,
+                    text: truncatedPrompt,
                     weight: 1
                   }
                 ],
@@ -93,73 +93,16 @@ export async function POST(req: Request) {
             // Don't throw here, try other options
           }
         } else {
-          console.log('Skipping Stability AI - API key not configured');
+          console.log('Skipping Stability AI - API key not configured or invalid');
         }
 
-        // Try Gemini with the correct model
-        try {
-          console.log('Trying Gemini...');
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          
-          const result = await model.generateContent({
-            contents: [{
-              role: "user",
-              parts: [{
-                text: `Create a detailed album cover image based on this description: ${prompt}. The image should be high quality, artistic, and suitable for a music album. Focus on creating a visually striking composition that captures the mood and theme of the music.`
-              }]
-            }],
-            generationConfig: {
-              temperature: 0.9,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 2048,
-            },
-            safetySettings: [
-              {
-                category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-              },
-              {
-                category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-              },
-              {
-                category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-              },
-              {
-                category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-              },
-            ],
-          });
-
-          const response = await result.response;
-          if (!response.candidates || response.candidates.length === 0) {
-            throw new Error('No response from Gemini API');
-          }
-          
-          const imageData = response.candidates[0]?.content?.parts[0]?.inlineData?.data;
-          
-          if (imageData) {
-            const imageUrl = `data:image/png;base64,${imageData}`;
-            return NextResponse.json({
-              success: true,
-              imageUrl: imageUrl
-            });
-          }
-        } catch (error: unknown) {
-          console.error('Detailed error in image generation:', error instanceof Error ? error.message : 'Unknown error');
-          if (error instanceof Error) {
-            throw new Error(`Image generation failed: ${error.message}`);
-          }
-          throw new Error('Image generation failed with unknown error');
-        }
+        // Try Gemini - Note: Gemini doesn't generate images directly, skip it
+        console.log('Skipping Gemini - text-only model');
 
         // Try Stable Diffusion as last resort
         if (REPLICATE_API_KEY) {
           try {
-            console.log('Trying Stable Diffusion...');
+            console.log('Trying Replicate Stable Diffusion...');
             const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
               method: 'POST',
               headers: {
@@ -169,7 +112,7 @@ export async function POST(req: Request) {
               body: JSON.stringify({
                 version: "db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
                 input: {
-                  prompt: prompt,
+                  prompt: truncatedPrompt.substring(0, 500), // Replicate also has limits
                   negative_prompt: "ugly, blurry, poor quality, distorted, deformed, disfigured, bad anatomy, bad proportions",
                   width: 1024,
                   height: 1024,
@@ -181,6 +124,10 @@ export async function POST(req: Request) {
               })
             });
 
+            if (!replicateResponse.ok) {
+              throw new Error('Replicate API request failed');
+            }
+
             const replicateData = await replicateResponse.json();
             
             if (replicateData.status === 'starting' || replicateData.status === 'processing') {
@@ -191,14 +138,48 @@ export async function POST(req: Request) {
                   imageUrl: result.output[0]
                 });
               }
+            } else if (replicateData.output?.[0]) {
+              return NextResponse.json({
+                success: true,
+                imageUrl: replicateData.output[0]
+              });
             }
           } catch (error) {
-            console.log('Stable Diffusion failed:', error);
+            console.log('Replicate Stable Diffusion failed:', error);
           }
         }
         
-        // If we get here, all APIs failed
-        throw new Error('All image generation APIs failed. Please try a different prompt or check API keys.');
+        // If we get here, all APIs failed - return a placeholder
+        console.log('All image generation APIs failed, using placeholder');
+        
+        // Create a simple colorful gradient placeholder based on prompt
+        const colors = ['4F46E5', 'EC4899', '10B981', 'F59E0B', '8B5CF6', 'EF4444'];
+        const color1 = colors[Math.floor(Math.random() * colors.length)];
+        const color2 = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Generate SVG placeholder
+        const svg = `
+          <svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#${color1};stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#${color2};stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <rect width="1024" height="1024" fill="url(#grad)"/>
+            <text x="512" y="462" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">🎵</text>
+            <text x="512" y="542" font-family="Arial, sans-serif" font-size="32" fill="white" text-anchor="middle" opacity="0.9">Album Artwork</text>
+            <text x="512" y="592" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle" opacity="0.7">${truncatedPrompt.substring(0, 50)}...</text>
+          </svg>
+        `.trim();
+        
+        const base64 = Buffer.from(svg).toString('base64');
+        return NextResponse.json({
+          success: true,
+          imageUrl: `data:image/svg+xml;base64,${base64}`,
+          placeholder: true,
+          message: 'Image generation APIs are not available. Using placeholder. Please configure valid API keys for Stability AI or Replicate.'
+        });
         
       } catch (error: unknown) {
         console.error('Detailed error in image generation:', error instanceof Error ? error.message : 'Unknown error');

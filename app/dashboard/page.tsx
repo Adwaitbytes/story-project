@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from '../components/Navigation'
 import Link from 'next/link'
+import { useWalletConnection } from '../lib/useWalletConnection'
 
 interface MusicStats {
   totalUploads: number
@@ -20,8 +21,7 @@ interface MusicStats {
 }
 
 export default function DashboardPage() {
-  const [account, setAccount] = useState<string>('')
-  const [connected, setConnected] = useState<boolean>(false)
+  const { address, isConnected, connectWallet } = useWalletConnection()
   const [stats, setStats] = useState<MusicStats>({
     totalUploads: 0,
     totalViews: 0,
@@ -31,25 +31,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  useEffect(() => {
-    const checkWallet = async () => {
-      if (typeof window.ethereum !== 'undefined') {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-          if (accounts.length > 0) {
-            setAccount(accounts[0])
-            setConnected(true)
-            loadUserStats(accounts[0])
-          }
-        } catch (error) {
-          console.error('Error checking wallet:', error)
-        }
-      }
-      setLoading(false)
-    }
+  // Use wallet hook values
+  const account = address || ''
+  const connected = isConnected
 
-    checkWallet()
-  }, [])
+  useEffect(() => {
+    if (connected && account) {
+      loadUserStats(account)
+    }
+    setLoading(false)
+  }, [connected, account])
 
   const loadUserStats = async (userAddress: string) => {
     try {
@@ -92,23 +83,6 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Error loading user stats:', error)
-    }
-  }
-
-  const connectWallet = async () => {
-    try {
-      if (typeof window.ethereum !== 'undefined') {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        })
-        if (accounts.length > 0) {
-          setAccount(accounts[0])
-          setConnected(true)
-          loadUserStats(accounts[0])
-        }
-      }
-    } catch (error) {
-      console.error('Error connecting wallet:', error)
     }
   }
 

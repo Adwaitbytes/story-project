@@ -4,14 +4,18 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Navigation from '../components/Navigation'
+import { useWalletConnection } from '../lib/useWalletConnection'
 
 export default function UploadPage() {
   const router = useRouter()
-  const [account, setAccount] = useState<string>('')
-  const [connected, setConnected] = useState<boolean>(false)
+  const { address, isConnected, connectWallet } = useWalletConnection()
   const [loading, setLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
+
+  // Use wallet hook values
+  const account = address || ''
+  const connected = isConnected
 
   // Form states
   const [title, setTitle] = useState<string>('')
@@ -23,22 +27,11 @@ export default function UploadPage() {
   const [audioPreview, setAudioPreview] = useState<string>('')
   const [imagePreview, setImagePreview] = useState<string>('')
 
-  // Connect wallet
-  const connectWallet = async () => {
+  // Handle wallet connection
+  const handleConnectWallet = async () => {
     try {
-      if (typeof window.ethereum !== 'undefined') {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        })
-
-        if (accounts.length > 0) {
-          setAccount(accounts[0])
-          setConnected(true)
-          showMessage('Wallet connected successfully!', 'success')
-        }
-      } else {
-        showMessage('Please install MetaMask!', 'error')
-      }
+      await connectWallet()
+      showMessage('Wallet connected successfully!', 'success')
     } catch (error) {
       showMessage('Failed to connect wallet', 'error')
     }
@@ -132,19 +125,6 @@ export default function UploadPage() {
     setTimeout(() => setMessage(''), 8000)
   }
 
-  // Check wallet connection on mount
-  useEffect(() => {
-    if (typeof window.ethereum !== 'undefined') {
-      window.ethereum.request({ method: 'eth_accounts' })
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            setAccount(accounts[0])
-            setConnected(true)
-          }
-        })
-    }
-  }, [])
-
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -172,10 +152,10 @@ export default function UploadPage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={connectWallet}
+                  onClick={handleConnectWallet}
                   className="btn-primary text-lg px-8 py-3"
                 >
-                  🦊 Connect Wallet
+                  📱 Connect Wallet
                 </motion.button>
               </motion.div>
             ) : (

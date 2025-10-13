@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Navigation from './components/Navigation'
 import MusicPlayer from './components/MusicPlayer'
+import { useWalletConnection } from './lib/useWalletConnection'
 
 // Types
 interface MusicNFT {
@@ -22,8 +23,7 @@ interface MusicNFT {
 }
 
 export default function Home() {
-  const [account, setAccount] = useState<string>('')
-  const [connected, setConnected] = useState<boolean>(false)
+  const { address, isConnected, isMobile, connectWallet } = useWalletConnection()
   const [loading, setLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
@@ -31,37 +31,9 @@ export default function Home() {
   const [selectedTrack, setSelectedTrack] = useState<MusicNFT | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  // Connect wallet
-  const connectWallet = async () => {
-    try {
-      console.log('🔗 Attempting to connect wallet...')
-      
-      if (typeof window.ethereum !== 'undefined') {
-        console.log('✅ MetaMask detected')
-        
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        })
-        console.log('📱 Accounts received:', accounts)
-
-        if (accounts.length > 0) {
-          setAccount(accounts[0])
-          setConnected(true)
-          console.log('🎉 Wallet connected successfully:', accounts[0])
-          showMessage('Wallet connected successfully!', 'success')
-          
-          const chainId = await window.ethereum.request({ method: 'eth_chainId' })
-          console.log('🌐 Current chain ID:', chainId)
-        }
-      } else {
-        console.error('❌ MetaMask not detected')
-        showMessage('Please install MetaMask!', 'error')
-      }
-    } catch (error) {
-      console.error('💥 Error connecting wallet:', error)
-      showMessage('Failed to connect wallet', 'error')
-    }
-  }
+  // Use address from wagmi hook
+  const account = address || ''
+  const connected = isConnected
 
   // Load user's music NFTs only
   const loadMyMusicNFTs = async (userAddress: string) => {
@@ -127,30 +99,6 @@ export default function Home() {
     }
   }, [connected, account])
 
-  // Listen for account changes
-  useEffect(() => {
-    const ethereum = typeof window !== 'undefined' ? window.ethereum : undefined;
-    
-    if (ethereum) {
-      const handleAccountsChanged = (accounts: string[]) => {
-        console.log('👤 Account changed:', accounts)
-        if (accounts.length === 0) {
-          setConnected(false)
-          setAccount('')
-          console.log('🔌 Wallet disconnected')
-        } else {
-          setAccount(accounts[0])
-          console.log('🔄 Account switched to:', accounts[0])
-        }
-      }
-
-      ethereum.on('accountsChanged', handleAccountsChanged)
-      return () => {
-        ethereum.removeListener('accountsChanged', handleAccountsChanged)
-      }
-    }
-  }, [])
-
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -182,7 +130,7 @@ export default function Home() {
                   onClick={connectWallet}
                   className="btn-primary text-lg px-8 py-3"
                 >
-                  🦊 Connect Wallet to Start
+                  {isMobile ? '📱' : '🦊'} Connect Wallet to Start
                 </motion.button>
               ) : (
                 <motion.button

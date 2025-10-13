@@ -3,12 +3,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../providers/ThemeProvider'
+import { useWalletConnection } from '../lib/useWalletConnection'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
 import Link from 'next/link'
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { theme, toggleTheme } = useTheme()
+  const { address, isConnected, isMobile } = useWalletConnection()
+  const { open } = useWeb3Modal()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,6 +70,24 @@ export default function Navigation() {
                 </Link>
               </motion.div>
             ))}
+
+            {/* Wallet Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => open()}
+              className="btn-primary px-4 py-2 text-sm"
+            >
+              {isConnected ? (
+                <>
+                  {isMobile ? '📱' : '🦊'} {address?.slice(0, 6)}...{address?.slice(-4)}
+                </>
+              ) : (
+                <>
+                  {isMobile ? '📱' : '🦊'} Connect
+                </>
+              )}
+            </motion.button>
 
             {/* Theme Toggle */}
             <motion.button
@@ -133,6 +155,25 @@ export default function Navigation() {
                 </motion.div>
               ))}
               
+              {/* Wallet Button in Mobile Menu */}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => open()}
+                className="w-full text-left px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700 flex items-center space-x-2"
+              >
+                {isConnected ? (
+                  <>
+                    <span>{isMobile ? '📱' : '🦊'}</span>
+                    <span>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isMobile ? '📱' : '🦊'}</span>
+                    <span>Connect Wallet</span>
+                  </>
+                )}
+              </motion.button>
+
               {/* Theme Toggle in Mobile Menu */}
               <motion.button
                 whileTap={{ scale: 0.95 }}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from './providers/ThemeProvider'
+import { Web3Provider } from './providers/Web3Provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,11 +30,13 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.className} antialiased transition-colors duration-200`}>
-        <ThemeProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-            {children}
-          </div>
-        </ThemeProvider>
+        <Web3Provider>
+          <ThemeProvider>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+              {children}
+            </div>
+          </ThemeProvider>
+        </Web3Provider>
       </body>
     </html>
   )
