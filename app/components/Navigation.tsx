@@ -10,6 +10,7 @@ import Link from 'next/link'
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const { theme, toggleTheme } = useTheme()
   const { address, isConnected, isMobile } = useWalletConnection()
   const { open } = useWeb3Modal()
@@ -22,11 +23,37 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Fetch notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (!isConnected || !address) return
+      
+      try {
+        const res = await fetch(`/api/notifications?owner=${address}`)
+        const data = await res.json()
+        if (data.success) {
+          setUnreadCount(data.unreadCount || 0)
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+      }
+    }
+
+    if (isConnected && address) {
+      fetchUnreadCount()
+      // Poll every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [isConnected, address])
+
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Explore', href: '/explore' },
     { name: 'AI Assistant', href: '/ai' },
     { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Notifications', href: '/notifications', badge: unreadCount },
+    { name: '🛡️ Admin', href: '/admin' },
   ]
 
   return (
@@ -61,6 +88,7 @@ export default function Navigation() {
                 key={item.name}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                className="relative"
               >
                 <Link
                   href={item.href}
@@ -68,6 +96,11 @@ export default function Navigation() {
                 >
                   {item.name}
                 </Link>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {item.badge > 9 ? '9+' : item.badge}
+                  </span>
+                )}
               </motion.div>
             ))}
 
@@ -144,6 +177,7 @@ export default function Navigation() {
                   key={item.name}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  className="relative"
                 >
                   <Link
                     href={item.href}
@@ -152,6 +186,11 @@ export default function Navigation() {
                   >
                     {item.name}
                   </Link>
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
                 </motion.div>
               ))}
               

@@ -17,6 +17,7 @@ interface MusicStats {
     createdAt: string
     ipId: string
     views: number
+    hidden?: boolean
   }>
 }
 
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   })
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
 
   // Use wallet hook values
   const account = address || ''
@@ -71,7 +73,8 @@ export default function DashboardPage() {
             artist: item.artist,
             createdAt: item.createdAt,
             ipId: item.ipId,
-            views: item.views || 0
+            views: item.views || 0,
+            hidden: item.hidden || false
           }))
 
         setStats({
@@ -109,6 +112,33 @@ export default function DashboardPage() {
       alert(`❌ Error deleting music: ${error}`)
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleToggleHide = async (id: string, title: string, currentHiddenState: boolean) => {
+    const action = currentHiddenState ? 'show' : 'hide'
+    if (!confirm(`Are you sure you want to ${action} "${title}" from the explore page?`)) {
+      return
+    }
+
+    setToggling(id)
+    try {
+      const res = await fetch(`/api/toggle-hide?id=${id}&owner=${account}`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        alert(`✅ ${data.hidden ? 'Hidden from explore page' : 'Now visible on explore page'}: "${title}"`)
+        // Refresh the stats
+        loadUserStats(account)
+      } else {
+        alert(`❌ Failed to ${action}: ${data.error}`)
+      }
+    } catch (error) {
+      alert(`❌ Error toggling visibility: ${error}`)
+    } finally {
+      setToggling(null)
     }
   }
 
@@ -234,6 +264,9 @@ export default function DashboardPage() {
                             Upload Date
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Views
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -253,6 +286,17 @@ export default function DashboardPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {new Date(upload.createdAt).toLocaleDateString()}
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              {upload.hidden ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  🔒 Hidden
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  👁️ Visible
+                                </span>
+                              )}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {upload.views}
                             </td>
@@ -265,6 +309,13 @@ export default function DashboardPage() {
                               >
                                 View ↗
                               </a>
+                              <button
+                                onClick={() => handleToggleHide(upload.id, upload.title, upload.hidden || false)}
+                                disabled={toggling === upload.id}
+                                className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 disabled:text-gray-400 inline-block"
+                              >
+                                {toggling === upload.id ? 'Processing...' : (upload.hidden ? 'Show' : 'Hide')}
+                              </button>
                               <button
                                 onClick={() => handleDelete(upload.id, upload.title)}
                                 disabled={deleting === upload.id}

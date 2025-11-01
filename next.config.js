@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
   images: {
     domains: ['ipfs.io', 'gateway.ipfs.io', 'cloudflare-ipfs.com', 'ipfs.infura.io'],
   },
@@ -25,14 +26,52 @@ const nextConfig = {
       },
     ]
   },
-  // Exclude scripts directory from build
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
+  // Webpack configuration
+  webpack: (config, { isServer }) => {
+    config.resolve.fallback = { 
+      fs: false, 
+      net: false, 
+      tls: false,
+      crypto: false,
+      stream: false,
+      http: false,
+      https: false,
+      zlib: false,
+      path: false,
+      os: false,
+      'pino-pretty': false,
+      '@react-native-async-storage/async-storage': false,
+    };
+    
+    // Suppress warnings for optional dependencies
+    config.ignoreWarnings = [
+      { module: /node_modules\/@metamask\/sdk/ },
+      { module: /node_modules\/pino/ },
+      { file: /node_modules\/@metamask\/sdk/ },
+      { file: /node_modules\/pino/ },
+    ];
+    
+    // Ignore node_modules from watch
+    if (!isServer) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: ['**/node_modules', '**/.git', '**/.next'],
+      };
+    }
+    
     return config;
   },
-  // Exclude scripts from build
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  transpilePackages: ['@rainbow-me/rainbowkit', 'viem'],
+  // Page extensions - only these will be treated as pages
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  // Transpile packages that need it
+  transpilePackages: ['@rainbow-me/rainbowkit', 'viem', '@story-protocol/core-sdk'],
+  // Experimental features
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    serverComponentsExternalPackages: ['pino', 'pino-pretty', '@metamask/sdk'],
+  },
 }
 
 module.exports = nextConfig

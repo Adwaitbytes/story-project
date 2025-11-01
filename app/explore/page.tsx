@@ -18,6 +18,7 @@ interface MusicNFT {
   createdAt: string
   ipId?: string
   txHash?: string
+  hidden?: boolean
 }
 
 export default function ExplorePage() {
@@ -29,7 +30,11 @@ export default function ExplorePage() {
     setLoading(true)
     const res = await fetch('/api/get-music')
     const data = await res.json()
-    if (data.success) setMusicNFTs(data.music)
+    if (data.success) {
+      // Filter out hidden tracks from explore page
+      const visibleMusic = (data.music || []).filter((nft: MusicNFT) => !nft.hidden)
+      setMusicNFTs(visibleMusic)
+    }
     setLoading(false)
   }
 

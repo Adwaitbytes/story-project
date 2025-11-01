@@ -3,6 +3,14 @@ import { put, del, list } from '@vercel/blob'
 import fs from 'fs'
 import path from 'path'
 
+export interface AdminComment {
+  id: string
+  admin: string
+  comment: string
+  timestamp: string
+  read: boolean
+}
+
 export interface MusicData {
   id: string
   title: string
@@ -16,6 +24,8 @@ export interface MusicData {
   createdAt: string
   ipId?: string
   txHash?: string
+  hidden?: boolean // New field to hide from explore page
+  adminComments?: AdminComment[] // Admin comments on this music
 }
 
 const STORAGE_FILE = path.join(process.cwd(), 'music-storage.json')

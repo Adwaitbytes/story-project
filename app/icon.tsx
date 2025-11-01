@@ -19,7 +19,7 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#000',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           borderRadius: '50%',
         }}
       >
@@ -28,10 +28,9 @@ export default function Icon() {
             fontSize: 20,
             fontWeight: 'bold',
             color: '#fff',
-            fontFamily: 'Arial',
           }}
         >
-          S
+          🎵
         </div>
       </div>
     ),

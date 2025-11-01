@@ -20,6 +20,7 @@ interface MusicNFT {
   createdAt: string
   ipId?: string
   txHash?: string
+  hidden?: boolean
 }
 
 export default function Home() {
@@ -30,6 +31,7 @@ export default function Home() {
   const [myMusicNFTs, setMyMusicNFTs] = useState<MusicNFT[]>([])
   const [selectedTrack, setSelectedTrack] = useState<MusicNFT | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
 
   // Use address from wagmi hook
   const account = address || ''
@@ -87,6 +89,38 @@ export default function Home() {
       showMessage(`❌ Error deleting music: ${error}`, 'error')
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleToggleHide = async (id: string, title: string, currentHiddenState: boolean) => {
+    const action = currentHiddenState ? 'show' : 'hide'
+    if (!confirm(`Are you sure you want to ${action} "${title}" from the explore page?`)) {
+      return
+    }
+
+    setToggling(id)
+    try {
+      const res = await fetch(`/api/toggle-hide?id=${id}&owner=${account}`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        showMessage(
+          `✅ ${data.hidden ? 'Hidden from explore page' : 'Now visible on explore page'}: "${title}"`,
+          'success'
+        )
+        // Refresh the music list
+        if (account) {
+          await loadMyMusicNFTs(account)
+        }
+      } else {
+        showMessage(`❌ Failed to ${action}: ${data.error}`, 'error')
+      }
+    } catch (error) {
+      showMessage(`❌ Error toggling visibility: ${error}`, 'error')
+    } finally {
+      setToggling(null)
     }
   }
 
@@ -237,27 +271,68 @@ export default function Home() {
                     className="card group cursor-pointer relative"
                     onClick={() => setSelectedTrack(nft)}
                   >
-                    {/* Delete Button - Only on My Music */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete(nft.id, nft.title)
-                      }}
-                      disabled={deleting === nft.id}
-                      className="absolute top-3 right-3 z-10 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white p-2 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
-                      title="Delete this music"
-                    >
-                      {deleting === nft.id ? (
-                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      )}
-                    </button>
+                    {/* Action Buttons Container */}
+                    <div className="absolute top-3 right-3 z-10 flex gap-2">
+                      {/* Hide/Unhide Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleToggleHide(nft.id, nft.title, nft.hidden || false)
+                        }}
+                        disabled={toggling === nft.id}
+                        className={`${
+                          nft.hidden
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : 'bg-yellow-500 hover:bg-yellow-600'
+                        } disabled:bg-gray-400 text-white p-2 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100`}
+                        title={nft.hidden ? 'Show on explore page' : 'Hide from explore page'}
+                      >
+                        {toggling === nft.id ? (
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : nft.hidden ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        )}
+                      </button>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(nft.id, nft.title)
+                        }}
+                        disabled={deleting === nft.id}
+                        className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white p-2 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        title="Delete this music"
+                      >
+                        {deleting === nft.id ? (
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Hidden Badge */}
+                    {nft.hidden && (
+                      <div className="absolute top-3 left-3 z-10 bg-yellow-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                        🔒 Hidden from Explore
+                      </div>
+                    )}
 
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
                       <img
