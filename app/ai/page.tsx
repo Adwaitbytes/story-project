@@ -25,7 +25,7 @@ export default function AIPage() {
     setError('')
 
     try {
-      const prompt = type === 'lyrics' 
+      const prompt = type === 'lyrics'
         ? `Generate lyrics for a song titled "${title}" by ${artist}`
         : `Generate a detailed prompt for creating an album cover artwork for a song titled "${title}" by ${artist}. The prompt should be descriptive and suitable for image generation.`
 
@@ -53,7 +53,7 @@ export default function AIPage() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             type: 'image_generation',
             prompt: data.content
           })
@@ -95,48 +95,54 @@ export default function AIPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen relative overflow-hidden bg-story-dark selection:bg-blue-500/30">
       <Navigation />
-      
-      <main className="pt-24 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      {/* Background Glow Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+      </div>
+
+      <main className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
           >
-            <div className="text-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white text-glow">
                 AI Music Assistant
               </h1>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">
+              <p className="text-story-text-secondary text-lg">
                 Generate lyrics and album artwork for your music using AI
               </p>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6">
+            <div className="glass-panel rounded-3xl p-8 shadow-2xl space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-300 ml-1">
                     Song Title
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="input-primary w-full"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                     placeholder="Enter song title"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-300 ml-1">
                     Artist Name
                   </label>
                   <input
                     type="text"
                     value={artist}
                     onChange={(e) => setArtist(e.target.value)}
-                    className="input-primary w-full"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                     placeholder="Enter artist name"
                   />
                 </div>
@@ -146,35 +152,29 @@ export default function AIPage() {
                 <button
                   onClick={() => generateContent('lyrics')}
                   disabled={loading === 'lyrics'}
-                  className="btn-primary flex-1"
+                  className="btn-primary flex-1 py-4 text-lg font-medium shadow-lg shadow-blue-500/20"
                 >
                   {loading === 'lyrics' ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Generating Lyrics...
                     </span>
                   ) : (
-                    'Generate Lyrics'
+                    '✨ Generate Lyrics'
                   )}
                 </button>
                 <button
                   onClick={() => generateContent('image')}
                   disabled={loading === 'image'}
-                  className="btn-secondary flex-1"
+                  className="btn-secondary flex-1 py-4 text-lg font-medium"
                 >
                   {loading === 'image' ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Generating Artwork...
                     </span>
                   ) : (
-                    'Generate Album Artwork'
+                    '🎨 Generate Artwork'
                   )}
                 </button>
               </div>
@@ -183,20 +183,27 @@ export default function AIPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 p-4 rounded-lg"
+                  className="bg-red-500/10 border border-red-500/20 text-red-200 p-4 rounded-xl flex items-center gap-3"
                 >
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                   {error}
                 </motion.div>
               )}
 
               {lyrics && (
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-black/20 rounded-xl p-6 border border-white/5"
+                >
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-semibold">Generated Lyrics</h3>
+                    <h3 className="text-xl font-bold text-white">Generated Lyrics</h3>
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={copyToClipboard}
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center"
+                        className="text-sm text-blue-400 hover:text-blue-300 flex items-center transition-colors"
                       >
                         {copySuccess ? (
                           <>
@@ -218,7 +225,7 @@ export default function AIPage() {
                         href="https://suno.com/create"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 flex items-center"
+                        className="text-sm text-green-400 hover:text-green-300 flex items-center transition-colors"
                       >
                         <svg className="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -227,39 +234,43 @@ export default function AIPage() {
                       </a>
                     </div>
                   </div>
-                  <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-300 font-mono text-sm">
+                  <pre className="whitespace-pre-wrap text-story-text-secondary font-mono text-sm leading-relaxed">
                     {lyrics}
                   </pre>
-                </div>
+                </motion.div>
               )}
 
               {imagePrompt && (
-                <div className="space-y-4">
-                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold mb-4">Image Generation Prompt</h3>
-                    <p className="text-gray-700 dark:text-gray-300">{imagePrompt}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="bg-black/20 rounded-xl p-6 border border-white/5">
+                    <h3 className="text-xl font-bold text-white mb-4">Image Generation Prompt</h3>
+                    <p className="text-story-text-secondary leading-relaxed">{imagePrompt}</p>
                   </div>
 
                   {generatedImage && (
-                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-                      <h3 className="text-xl font-semibold mb-4">Generated Album Artwork</h3>
-                      <div className="relative aspect-square max-w-md mx-auto mb-4">
+                    <div className="bg-black/20 rounded-xl p-6 border border-white/5">
+                      <h3 className="text-xl font-bold text-white mb-6">Generated Album Artwork</h3>
+                      <div className="relative aspect-square max-w-md mx-auto mb-6 rounded-xl overflow-hidden shadow-2xl border border-white/10">
                         <Image
                           src={generatedImage}
                           alt="Generated album artwork"
                           fill
-                          className="rounded-lg object-cover"
+                          className="object-cover"
                         />
                       </div>
                       <button
                         onClick={downloadImage}
-                        className="btn-primary w-full"
+                        className="btn-primary w-full py-3"
                       >
                         Download Image
                       </button>
                     </div>
                   )}
-                </div>
+                </motion.div>
               )}
             </div>
           </motion.div>
@@ -267,4 +278,4 @@ export default function AIPage() {
       </main>
     </div>
   )
-} 
+}

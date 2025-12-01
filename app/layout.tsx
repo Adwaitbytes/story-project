@@ -32,7 +32,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased transition-colors duration-200`}>
         <Web3Provider>
           <ThemeProvider>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="min-h-screen text-story-text-primary">
               {children}
             </div>
           </ThemeProvider>

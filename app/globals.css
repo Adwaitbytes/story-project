@@ -4,136 +4,48 @@
 
 @layer base {
   :root {
-    --primary: 59 130 246;
-    --primary-dark: 37 99 235;
-    --background: 249 250 251;
-    --foreground: 17 24 39;
+    --background: 5 5 5;
+    --foreground: 243 244 246;
   }
 
-  .dark {
-    --primary: 96 165 250;
-    --primary-dark: 59 130 246;
-    --background: 17 24 39;
-    --foreground: 249 250 251;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-  
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+    @apply bg-story-dark text-story-text-primary antialiased;
+    background-color: #050505;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg 
-           hover:bg-blue-700 dark:hover:bg-blue-600 
-           transition-all duration-200 ease-in-out
-           focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900;
+    @apply px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-medium
+           hover:bg-white/20 hover:scale-105 hover:border-white/40
+           transition-all duration-300 ease-out
+           shadow-[0_0_20px_rgba(0,0,0,0.3)];
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg 
-           hover:bg-gray-300 dark:hover:bg-gray-600 
-           transition-all duration-200 ease-in-out
-           focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900;
+    @apply px-6 py-3 rounded-full bg-transparent border border-white/10 text-gray-300 font-medium
+           hover:bg-white/5 hover:text-white hover:border-white/30
+           transition-all duration-300 ease-out;
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 
-           transition-all duration-200 ease-in-out
-           hover:shadow-xl dark:hover:shadow-gray-700/50;
+    @apply bg-story-card backdrop-blur-xl border border-story-border rounded-2xl p-6
+           hover:border-white/20 hover:bg-white/10
+           transition-all duration-300 ease-out;
   }
 
-  .input-primary {
-    @apply w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-           focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-           transition-all duration-200 ease-in-out;
+  .glass-panel {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10;
   }
-
-  .hover-card {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hover-card:hover {
-    /* Add your hover styles here */
+  
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
   }
 }
 
 @layer utilities {
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.5s ease-out;
-  }
-
-  .animate-scale {
-    animation: scale 0.3s ease-in-out;
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400;
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes scale {
-  from {
-    transform: scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}

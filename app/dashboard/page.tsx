@@ -50,20 +50,20 @@ export default function DashboardPage() {
       const data = await response.json()
 
       if (data.success) {
-        const userMusic = data.music.filter((item: any) => 
+        const userMusic = data.music.filter((item: any) =>
           item.owner.toLowerCase() === userAddress.toLowerCase()
         )
 
         // Calculate stats
         const totalUploads = userMusic.length
         const totalViews = userMusic.reduce((sum: number, item: any) => sum + (item.views || 0), 0)
-        const totalEarnings = userMusic.reduce((sum: number, item: any) => 
+        const totalEarnings = userMusic.reduce((sum: number, item: any) =>
           sum + (parseFloat(item.price) || 0), 0
         )
 
         // Get recent uploads
         const recentUploads = userMusic
-          .sort((a: any, b: any) => 
+          .sort((a: any, b: any) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )
           .slice(0, 5)
@@ -144,42 +144,48 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navigation />
-        <main className="pt-24 pb-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-center items-center py-24">
-              <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>
-          </div>
-        </main>
+      <div className="min-h-screen bg-story-dark flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
       </div>
     )
   }
 
   if (!connected) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen relative overflow-hidden bg-story-dark selection:bg-blue-500/30">
         <Navigation />
-        <main className="pt-24 pb-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8">
+
+        {/* Background Glow Effects */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+        </div>
+
+        <main className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-panel rounded-3xl p-12 shadow-2xl"
+            >
+              <div className="w-20 h-20 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-8">
+                <svg className="w-10 h-10 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h1 className="text-4xl font-bold mb-6 text-white text-glow">
                 Connect Your Wallet
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                Connect your wallet to view your music dashboard
+              <p className="text-story-text-secondary text-lg mb-8 max-w-md mx-auto">
+                Connect your wallet to access your dashboard, view stats, and manage your music IP assets.
               </p>
               <button
                 onClick={connectWallet}
-                className="btn-primary text-lg px-8 py-3"
+                className="btn-primary px-8 py-3 text-lg"
               >
-                🦊 Connect Wallet
+                Connect Wallet
               </button>
-            </div>
+            </motion.div>
           </div>
         </main>
       </div>
@@ -187,176 +193,232 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen relative overflow-hidden bg-story-dark selection:bg-blue-500/30">
       <Navigation />
-      
-      <main className="pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      {/* Background Glow Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+      </div>
+
+      <main className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-8"
           >
-            <div className="flex justify-between items-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Dashboard
-              </h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="text-4xl font-bold text-white text-glow mb-2">
+                  Dashboard
+                </h1>
+                <p className="text-story-text-secondary">
+                  Manage your music IP assets and view performance stats
+                </p>
+              </div>
               <Link
                 href="/upload"
-                className="btn-primary"
+                className="btn-primary px-6 py-3 flex items-center gap-2"
               >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
                 Upload New Music
               </Link>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <svg className="w-24 h-24 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                </div>
+                <h3 className="text-story-text-secondary font-medium mb-2">
                   Total Uploads
                 </h3>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                <p className="text-4xl font-bold text-white">
                   {stats.totalUploads}
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <svg className="w-24 h-24 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-story-text-secondary font-medium mb-2">
                   Total Views
                 </h3>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                <p className="text-4xl font-bold text-white">
                   {stats.totalViews}
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <div className="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <svg className="w-24 h-24 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17a1 1 0 11-2 0v-.07A7.003 7.003 0 015 10a1 1 0 012 0 5 5 0 105 5 1 1 0 012 0 7.003 7.003 0 01-1 6.93z" />
+                  </svg>
+                </div>
+                <h3 className="text-story-text-secondary font-medium mb-2">
                   Total Earnings
                 </h3>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {stats.totalEarnings} IP
+                <p className="text-4xl font-bold text-white">
+                  {stats.totalEarnings} <span className="text-lg text-story-text-secondary font-normal">IP</span>
                 </p>
               </div>
             </div>
 
             {/* Recent Uploads */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="glass-panel rounded-2xl overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <h2 className="text-xl font-bold text-white">
                   Recent Uploads
                 </h2>
-                {stats.recentUploads.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+              </div>
+
+              {stats.recentUploads.length === 0 ? (
+                <div className="p-12 text-center">
+                  <p className="text-story-text-secondary text-lg mb-6">
                     No music uploaded yet
                   </p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead>
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Title
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Artist
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Upload Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Views
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Actions
-                          </th>
+                  <Link href="/upload" className="btn-secondary">
+                    Upload Your First Track
+                  </Link>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-white/5">
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Title
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Artist
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Views
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-story-text-secondary uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {stats.recentUploads.map((upload) => (
+                        <tr key={upload.id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                            {upload.title}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-story-text-secondary">
+                            {upload.artist}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-story-text-secondary">
+                            {new Date(upload.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {upload.hidden ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                                🔒 Hidden
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                                👁️ Visible
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-story-text-secondary">
+                            {upload.views}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
+                            <a
+                              href={`https://aeneid.explorer.story.foundation/ipa/${upload.ipId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 transition-colors inline-block"
+                            >
+                              View ↗
+                            </a>
+                            <button
+                              onClick={() => handleToggleHide(upload.id, upload.title, upload.hidden || false)}
+                              disabled={toggling === upload.id}
+                              className="text-yellow-400 hover:text-yellow-300 disabled:text-gray-600 transition-colors inline-block"
+                            >
+                              {toggling === upload.id ? '...' : (upload.hidden ? 'Show' : 'Hide')}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(upload.id, upload.title)}
+                              disabled={deleting === upload.id}
+                              className="text-red-400 hover:text-red-300 disabled:text-gray-600 transition-colors inline-block"
+                            >
+                              {deleting === upload.id ? '...' : 'Delete'}
+                            </button>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {stats.recentUploads.map((upload) => (
-                          <tr key={upload.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                              {upload.title}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              {upload.artist}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(upload.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              {upload.hidden ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                  🔒 Hidden
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                  👁️ Visible
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              {upload.views}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                              <a
-                                href={`https://aeneid.explorer.story.foundation/ipa/${upload.ipId}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-block"
-                              >
-                                View ↗
-                              </a>
-                              <button
-                                onClick={() => handleToggleHide(upload.id, upload.title, upload.hidden || false)}
-                                disabled={toggling === upload.id}
-                                className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 disabled:text-gray-400 inline-block"
-                              >
-                                {toggling === upload.id ? 'Processing...' : (upload.hidden ? 'Show' : 'Hide')}
-                              </button>
-                              <button
-                                onClick={() => handleDelete(upload.id, upload.title)}
-                                disabled={deleting === upload.id}
-                                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:text-gray-400 inline-block"
-                              >
-                                {deleting === upload.id ? 'Deleting...' : 'Delete'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Link
                 href="/ai"
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                className="glass-panel rounded-2xl p-6 hover:bg-white/10 transition-colors group"
               >
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  AI Music Assistant
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Generate lyrics and album artwork using AI
-                </p>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-2xl">✨</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">
+                      AI Music Assistant
+                    </h3>
+                    <p className="text-sm text-story-text-secondary">
+                      Generate lyrics and artwork
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center text-purple-400 text-sm font-medium">
+                  Try it out <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
               </Link>
 
               <Link
                 href="/explore"
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                className="glass-panel rounded-2xl p-6 hover:bg-white/10 transition-colors group"
               >
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Explore Music
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Discover new music from other artists
-                </p>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <span className="text-2xl">🎵</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">
+                      Explore Music
+                    </h3>
+                    <p className="text-sm text-story-text-secondary">
+                      Discover new tracks
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center text-blue-400 text-sm font-medium">
+                  Browse now <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
               </Link>
             </div>
           </motion.div>
@@ -364,4 +426,4 @@ export default function DashboardPage() {
       </main>
     </div>
   )
-} 
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Navigation from '../components/Navigation'
 import MusicPlayer from '../components/MusicPlayer'
 
@@ -28,12 +28,16 @@ export default function ExplorePage() {
 
   const fetchMusic = async () => {
     setLoading(true)
-    const res = await fetch('/api/get-music')
-    const data = await res.json()
-    if (data.success) {
-      // Filter out hidden tracks from explore page
-      const visibleMusic = (data.music || []).filter((nft: MusicNFT) => !nft.hidden)
-      setMusicNFTs(visibleMusic)
+    try {
+      const res = await fetch('/api/get-music')
+      const data = await res.json()
+      if (data.success) {
+        // Filter out hidden tracks from explore page
+        const visibleMusic = (data.music || []).filter((nft: MusicNFT) => !nft.hidden)
+        setMusicNFTs(visibleMusic)
+      }
+    } catch (error) {
+      console.error('Error fetching music:', error)
     }
     setLoading(false)
   }
@@ -43,76 +47,100 @@ export default function ExplorePage() {
   }, [])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden bg-story-dark selection:bg-blue-500/30">
       <Navigation />
-      <main className="pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.h1
+
+      {/* Background Glow Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] right-1/2 translate-x-1/2 w-[1000px] h-[1000px] bg-blue-600/10 rounded-full blur-[120px] opacity-40 mix-blend-screen" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[100px] opacity-30 mix-blend-screen" />
+      </div>
+
+      <main className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+            className="text-center mb-16"
           >
-            Explore Music NFTs
-          </motion.h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white text-glow">
+              Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Music NFTs</span>
+            </h1>
+            <p className="text-story-text-secondary text-lg max-w-2xl mx-auto">
+              Discover unique music IP assets registered on Story Protocol.
+            </p>
+          </motion.div>
 
           {loading ? (
             <div className="flex justify-center items-center py-24">
-              <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
             </div>
           ) : musicNFTs.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-              No music NFTs found. Be the first to upload!
-            </p>
+            <div className="glass-panel rounded-3xl p-16 text-center max-w-2xl mx-auto">
+              <p className="text-story-text-secondary text-lg">
+                No music NFTs found. Be the first to upload!
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {musicNFTs.map((nft) => (
                 <motion.div
                   key={nft.id}
-                  whileHover={{ y: -5, scale: 1.03 }}
-                  className="card group cursor-pointer"
+                  whileHover={{ y: -8 }}
+                  className="card group cursor-pointer relative overflow-hidden"
                   onClick={() => setSelectedTrack(nft)}
                 >
-                  <div className="relative aspect-square rounded-lg overflow-hidden mb-4">
+                  {/* Hover Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="relative aspect-square rounded-xl overflow-hidden mb-5">
                     <img
                       src={nft.imageUrl}
                       alt={nft.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300" />
+
+                    {/* Play Icon Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                        <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-lg mb-2 line-clamp-1">
-                    {nft.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-2">
-                    by {nft.artist}
-                  </p>
-                  {nft.description && (
-                    <p className="text-gray-500 dark:text-gray-500 text-sm mb-3 line-clamp-2">
-                      {nft.description}
+
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-lg text-white line-clamp-1 group-hover:text-blue-400 transition-colors">
+                      {nft.title}
+                    </h3>
+                    <p className="text-sm text-story-text-secondary">
+                      by {nft.artist}
                     </p>
-                  )}
-                  {nft.price && nft.price !== '0' && (
-                    <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
-                      {nft.price} IP
-                    </p>
-                  )}
-                  <div className="text-xs text-gray-400 dark:text-gray-500">
-                    <p>Owner: {nft.owner.slice(0, 6)}...{nft.owner.slice(-4)}</p>
-                    <p>Created: {new Date(nft.createdAt).toLocaleDateString()}</p>
-                    {nft.ipId && (
-                      <a
-                        href={`https://aeneid.explorer.story.foundation/ipa/${nft.ipId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 mt-2 inline-block"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        View on Story Protocol Explorer ↗
-                      </a>
+
+                    {nft.description && (
+                      <p className="text-sm text-story-text-secondary/80 line-clamp-2">
+                        {nft.description}
+                      </p>
                     )}
+
+                    <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-4">
+                      <span className="text-blue-400 font-medium">
+                        {nft.price && nft.price !== '0' ? `${nft.price} IP` : 'Free'}
+                      </span>
+                      {nft.ipId && (
+                        <a
+                          href={`https://aeneid.explorer.story.foundation/ipa/${nft.ipId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-story-text-secondary hover:text-white transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View IP Asset ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -120,31 +148,34 @@ export default function ExplorePage() {
           )}
         </div>
       </main>
+
       {/* Music Player Modal */}
-      {selectedTrack && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedTrack(null)}
-        >
+      <AnimatePresence>
+        {selectedTrack && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6"
-            onClick={e => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedTrack(null)}
           >
-            <MusicPlayer
-              audioUrl={selectedTrack.audioUrl}
-              title={selectedTrack.title}
-              artist={selectedTrack.artist}
-              imageUrl={selectedTrack.imageUrl}
-            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <MusicPlayer
+                audioUrl={selectedTrack.audioUrl}
+                title={selectedTrack.title}
+                artist={selectedTrack.artist}
+                imageUrl={selectedTrack.imageUrl}
+              />
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   )
-} 
+}
